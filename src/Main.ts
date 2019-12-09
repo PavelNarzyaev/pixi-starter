@@ -1,15 +1,13 @@
 import MainContainer from "./MainContainer";
 import Rectangle = PIXI.Rectangle;
 import Application = PIXI.Application;
-import Container = PIXI.Container;
 
-export class Main extends Container {
+export class Main {
 	private _size:Rectangle;
 	private _pixiApp:Application;
 	private _mainContainer:MainContainer;
 
 	constructor(canvasId:string) {
-		super();
 		this.initSize();
 		this.initPixiApp(canvasId);
 		this.initMainContainer();
@@ -28,7 +26,6 @@ export class Main extends Container {
 			// needed to avoid troubles with invisible fonts on some Android devices
 			resolution: ((devicePixelRatio || 1) < 2) ? 1 : 2,
 		});
-		this._pixiApp.stage.addChild(this);
 	}
 
 	private initMainContainer():void {
