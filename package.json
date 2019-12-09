@@ -5,6 +5,10 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:PavelNarzyaev/pixi-starter.git"
+  },
   "scripts": {
     "npm-install": "npm --loglevel=error install",
     "local-test": "webpack --watch --config webpack.config.js",
