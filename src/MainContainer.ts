@@ -1,11 +1,13 @@
-import * as PIXI from "pixi.js";
+import Container = PIXI.Container;
+import Graphics = PIXI.Graphics;
+import Text = PIXI.Text;
 
-export default class MainContainer extends PIXI.Container {
+export default class MainContainer extends Container {
 	public static readonly WIDTH:number = 700;
 	public static readonly HEIGHT:number = 350;
 
-	private _background:PIXI.Graphics;
-	private _textField:PIXI.Text;
+	private _background:Graphics;
+	private _textField:Text;
 
 	constructor() {
 		super();
@@ -18,7 +20,7 @@ export default class MainContainer extends PIXI.Container {
 	}
 
 	private initBackground():void {
-		this._background = new PIXI.Graphics();
+		this._background = new Graphics();
 		this._background.beginFill(0xffffff);
 		this._background.drawRect(0, 0, MainContainer.WIDTH, MainContainer.HEIGHT);
 		this._background.endFill();
@@ -26,7 +28,7 @@ export default class MainContainer extends PIXI.Container {
 	}
 
 	private initTextField():void {
-		this._textField = new PIXI.Text("Hello!");
+		this._textField = new Text("Hello!");
 		this._textField.x = (MainContainer.WIDTH - this._textField.width) / 2;
 		this._textField.y = (MainContainer.HEIGHT - this._textField.height) / 2;
 		this.addChild(this._textField);

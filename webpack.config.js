@@ -1,4 +1,5 @@
 const path = require("path");
+const webpack = require("webpack");
 const BrowserSyncPlugin = require("browser-sync-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const { CleanWebpackPlugin} = require("clean-webpack-plugin");
@@ -73,6 +74,12 @@ module.exports = env => {
 			[{from:assetsFolder}],
 			{debug: "debug"}
 		)
+	);
+
+	plugins.push(
+		new webpack.ProvidePlugin({
+			PIXI: 'pixi.js'
+		})
 	);
 
 	if (!envRelease) {

@@ -1,9 +1,11 @@
-import * as PIXI from "pixi.js";
 import MainContainer from "./MainContainer";
+import Rectangle = PIXI.Rectangle;
+import Application = PIXI.Application;
+import Container = PIXI.Container;
 
-export class Main extends PIXI.Container {
-	private _size:PIXI.Rectangle;
-	private _pixiApp:PIXI.Application;
+export class Main extends Container {
+	private _size:Rectangle;
+	private _pixiApp:Application;
 	private _mainContainer:MainContainer;
 
 	constructor(canvasId:string) {
@@ -16,11 +18,11 @@ export class Main extends PIXI.Container {
 	}
 
 	private initSize():void {
-		this._size = new PIXI.Rectangle();
+		this._size = new Rectangle();
 	}
 
 	private initPixiApp(canvasId:string):void {
-		this._pixiApp = new PIXI.Application({
+		this._pixiApp = new Application({
 			backgroundColor: 0x000000,
 			view: document.getElementById(canvasId) as HTMLCanvasElement,
 			// needed to avoid troubles with invisible fonts on some Android devices
