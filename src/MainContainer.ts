@@ -5,9 +5,12 @@ import {genRandomInteger} from "./Random";
 import Pixi from "./Pixi";
 
 export default class MainContainer extends Container {
-	public static readonly WIDTH:number = 700;
-	public static readonly HEIGHT:number = 350;
-	private static readonly CIRCLES_NUM:number = 100;
+	public static readonly WIDTH:number = 500;
+	public static readonly HEIGHT:number = 500;
+	private static readonly CIRCLES_NUM:number = 30;
+	private static readonly GRAVITY:number = .1;
+	private static readonly FRICTION:number = .03;
+	private static readonly BOUNCE_FACTOR:number = .7;
 	private _background:Graphics;
 	private _circles:Set<Circle> = new Set<Circle>();
 
@@ -43,7 +46,7 @@ export default class MainContainer extends Container {
 		while (i < MainContainer.CIRCLES_NUM) {
 			const circle:Circle = new Circle();
 			circle.x = genRandomInteger(circle.radius, MainContainer.WIDTH - circle.radius);
-			circle.y = genRandomInteger(circle.radius, MainContainer.HEIGHT - circle.radius);
+			circle.y = genRandomInteger(circle.radius, MainContainer.HEIGHT * 2 / 3 - circle.radius);
 			this.addChild(circle);
 			this._circles.add(circle);
 			i++;
@@ -59,20 +62,41 @@ export default class MainContainer extends Container {
 
 	private tick(dt:number):void {
 		this._circles.forEach((circle:Circle) => {
-			this.processCircle(
-				circle.x + circle.speedX * dt,
-				circle.radius,
-				MainContainer.WIDTH - circle.radius,
-				(newX:number) => circle.x = newX,
-				() => circle.speedX *= -1
-			);
-			this.processCircle(
-				circle.y + circle.speedY * dt,
-				circle.radius,
-				MainContainer.HEIGHT - circle.radius,
-				(newY:number) => circle.y = newY,
-				() => circle.speedY *= -1
-			);
+			circle.speedY += MainContainer.GRAVITY;
+			if (circle.speedX != 0) {
+				if (circle.onTheFloor) {
+					const absSpeedX:number = Math.max(Math.abs(circle.speedX) - MainContainer.FRICTION, 0);
+					const direction:number = (circle.speedX > 0 ? 1 : -1);
+					circle.speedX = absSpeedX * direction;
+				}
+				this.processCircle(
+					circle.x + circle.speedX * dt,
+					circle.radius,
+					MainContainer.WIDTH - circle.radius,
+					(newX:number) => circle.x = newX,
+					() => circle.speedX *= -1
+				);
+			}
+			if (circle.speedY != 0) {
+				const maxPosY:number = MainContainer.HEIGHT - circle.radius;
+				this.processCircle(
+					circle.y + circle.speedY * dt,
+					circle.radius,
+					maxPosY,
+					(newY:number) => circle.y = newY,
+					() => {
+						if (Math.abs(circle.speedY) < 1) {
+							circle.speedY = 0;
+							circle.y = maxPosY;
+							circle.onTheFloor = true;
+						} else if (circle.speedY > 0) {
+							circle.speedY *= -MainContainer.BOUNCE_FACTOR;
+						} else {
+							circle.speedY *= -1;
+						}
+					}
+				);
+			}
 		});
 	}
 
@@ -81,14 +105,14 @@ export default class MainContainer extends Container {
 		minPos:number,
 		maxPos:number,
 		setPos:(value:number) => void,
-		invertSpeed:() => void
+		bounce:() => void
 	):void {
 		if (targetPos < minPos) {
 			setPos(minPos + (minPos - targetPos));
-			invertSpeed();
+			bounce();
 		} else if (targetPos > maxPos) {
 			setPos(maxPos - (targetPos - maxPos));
-			invertSpeed();
+			bounce();
 		} else {
 			setPos(targetPos);
 		}
