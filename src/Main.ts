@@ -21,7 +21,7 @@ export class Main {
 
 	private initPixiApp(canvasId:string):void {
 		Pixi.app = new Application({
-			backgroundColor: 0x000000,
+			backgroundColor: 0xffffff,
 			view: document.getElementById(canvasId) as HTMLCanvasElement,
 			// needed to avoid troubles with invisible fonts on some Android devices
 			resolution: ((devicePixelRatio || 1) < 2) ? 1 : 2,
@@ -56,10 +56,6 @@ export class Main {
 	}
 
 	private alignMainContainer():void {
-		const scaleByWidth:number = this._size.width / MainContainer.WIDTH;
-		const scaleByHeight:number = this._size.height / MainContainer.HEIGHT;
-		this._mainContainer.scale.x = this._mainContainer.scale.y = Math.min(scaleByWidth, scaleByHeight);
-		this._mainContainer.x = (this._size.width - MainContainer.WIDTH * this._mainContainer.scale.x) / 2;
-		this._mainContainer.y = (this._size.height - MainContainer.HEIGHT * this._mainContainer.scale.y) / 2;
+		this._mainContainer.setSize(this._size.width, this._size.height);
 	}
 }
