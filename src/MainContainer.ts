@@ -8,6 +8,7 @@ export default class MainContainer extends Container {
 	public static readonly HEIGHT:number = 350;
 	private static readonly CIRCLES_NUM:number = 30;
 	private _background:Graphics;
+	private _circles:Set<Circle> = new Set<Circle>();
 
 	constructor() {
 		super();
@@ -15,8 +16,16 @@ export default class MainContainer extends Container {
 	}
 
 	private init():void {
+		this.interactive = true;
+		this.addListener("pointerdown", this.refreshCircles, this);
+
 		this.initBackground();
-		this.initCircles();
+		this.createCircles();
+	}
+
+	private refreshCircles():void {
+		this.removeCircles();
+		this.createCircles();
 	}
 
 	private initBackground():void {
@@ -27,14 +36,22 @@ export default class MainContainer extends Container {
 		this.addChild(this._background);
 	}
 
-	private initCircles():void {
+	private createCircles():void {
 		let i:number = 0;
 		while (i < MainContainer.CIRCLES_NUM) {
-			const newCircle:Circle = new Circle();
-			newCircle.x = genRandomInteger(newCircle.radius, MainContainer.WIDTH - newCircle.radius);
-			newCircle.y = genRandomInteger(newCircle.radius, MainContainer.HEIGHT / 2 - newCircle.radius);
-			this.addChild(newCircle);
+			const circle:Circle = new Circle();
+			circle.x = genRandomInteger(circle.radius, MainContainer.WIDTH - circle.radius);
+			circle.y = genRandomInteger(circle.radius, MainContainer.HEIGHT / 2 - circle.radius);
+			this.addChild(circle);
+			this._circles.add(circle);
 			i++;
 		}
+	}
+
+	private removeCircles():void {
+		this._circles.forEach((circle:Circle) => {
+			circle.parent.removeChild(circle);
+		});
+		this._circles.clear();
 	}
 }
