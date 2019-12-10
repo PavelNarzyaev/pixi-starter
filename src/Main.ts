@@ -1,10 +1,10 @@
 import MainContainer from "./MainContainer";
 import Rectangle = PIXI.Rectangle;
 import Application = PIXI.Application;
+import Pixi from "./Pixi";
 
 export class Main {
 	private _size:Rectangle;
-	private _pixiApp:Application;
 	private _mainContainer:MainContainer;
 
 	constructor(canvasId:string) {
@@ -20,7 +20,7 @@ export class Main {
 	}
 
 	private initPixiApp(canvasId:string):void {
-		this._pixiApp = new Application({
+		Pixi.app = new Application({
 			backgroundColor: 0x000000,
 			view: document.getElementById(canvasId) as HTMLCanvasElement,
 			// needed to avoid troubles with invisible fonts on some Android devices
@@ -30,7 +30,7 @@ export class Main {
 
 	private initMainContainer():void {
 		this._mainContainer = new MainContainer();
-		this._pixiApp.stage.addChild(this._mainContainer);
+		Pixi.app.stage.addChild(this._mainContainer);
 	}
 
 	private resize():void {
@@ -50,9 +50,9 @@ export class Main {
 	}
 
 	private alignPixiApp():void {
-		this._pixiApp.renderer.view.style.width = this._size.width + "px";
-		this._pixiApp.renderer.view.style.height = this._size.height + "px";
-		this._pixiApp.renderer.resize(this._size.width, this._size.height);
+		Pixi.app.renderer.view.style.width = this._size.width + "px";
+		Pixi.app.renderer.view.style.height = this._size.height + "px";
+		Pixi.app.renderer.resize(this._size.width, this._size.height);
 	}
 
 	private alignContainer():void {

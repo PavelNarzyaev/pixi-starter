@@ -2,6 +2,7 @@ import Container = PIXI.Container;
 import Circle from "./Circle";
 import Graphics = PIXI.Graphics;
 import {genRandomInteger} from "./Random";
+import Pixi from "./Pixi";
 
 export default class MainContainer extends Container {
 	public static readonly WIDTH:number = 700;
@@ -21,6 +22,7 @@ export default class MainContainer extends Container {
 
 		this.initBackground();
 		this.createCircles();
+		Pixi.app.ticker.add((dt:number) => this.tick(dt));
 	}
 
 	private refreshCircles():void {
@@ -53,5 +55,9 @@ export default class MainContainer extends Container {
 			circle.parent.removeChild(circle);
 		});
 		this._circles.clear();
+	}
+
+	private tick(dt:number):void {
+		console.log(dt);
 	}
 }
