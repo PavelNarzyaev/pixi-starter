@@ -1,13 +1,13 @@
 import Container = PIXI.Container;
+import Circle from "./Circle";
 import Graphics = PIXI.Graphics;
-import Text = PIXI.Text;
+import {genRandomInteger} from "./Random";
 
 export default class MainContainer extends Container {
 	public static readonly WIDTH:number = 700;
 	public static readonly HEIGHT:number = 350;
-
+	private static readonly CIRCLES_NUM:number = 30;
 	private _background:Graphics;
-	private _textField:Text;
 
 	constructor() {
 		super();
@@ -16,7 +16,7 @@ export default class MainContainer extends Container {
 
 	private init():void {
 		this.initBackground();
-		this.initTextField();
+		this.initCircles();
 	}
 
 	private initBackground():void {
@@ -27,10 +27,14 @@ export default class MainContainer extends Container {
 		this.addChild(this._background);
 	}
 
-	private initTextField():void {
-		this._textField = new Text("Hello!");
-		this._textField.x = (MainContainer.WIDTH - this._textField.width) / 2;
-		this._textField.y = (MainContainer.HEIGHT - this._textField.height) / 2;
-		this.addChild(this._textField);
+	private initCircles():void {
+		let i:number = 0;
+		while (i < MainContainer.CIRCLES_NUM) {
+			const newCircle:Circle = new Circle();
+			newCircle.x = genRandomInteger(newCircle.radius, MainContainer.WIDTH - newCircle.radius);
+			newCircle.y = genRandomInteger(newCircle.radius, MainContainer.HEIGHT / 2 - newCircle.radius);
+			this.addChild(newCircle);
+			i++;
+		}
 	}
 }

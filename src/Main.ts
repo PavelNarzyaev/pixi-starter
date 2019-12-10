@@ -59,7 +59,7 @@ export class Main {
 		const scaleByWidth:number = this._size.width / MainContainer.WIDTH;
 		const scaleByHeight:number = this._size.height / MainContainer.HEIGHT;
 		this._mainContainer.scale.x = this._mainContainer.scale.y = Math.min(scaleByWidth, scaleByHeight);
-		this._mainContainer.x = (this._size.width - this._mainContainer.width) / 2;
-		this._mainContainer.y = (this._size.height - this._mainContainer.height) / 2;
+		this._mainContainer.x = (this._size.width - MainContainer.WIDTH * this._mainContainer.scale.x) / 2;
+		this._mainContainer.y = (this._size.height - MainContainer.HEIGHT * this._mainContainer.scale.y) / 2;
 	}
 }
