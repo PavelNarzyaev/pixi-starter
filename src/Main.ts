@@ -4,6 +4,8 @@ import Application = PIXI.Application;
 import Pixi from "./Pixi";
 
 export class Main {
+	private static readonly MIN_MAIN_CONTAINER_WIDTH:number = 500;
+	private static readonly MIN_MAIN_CONTAINER_HEIGHT:number = 500;
 	private _size:Rectangle;
 	private _mainContainer:MainContainer;
 
@@ -30,6 +32,7 @@ export class Main {
 
 	private initMainContainer():void {
 		this._mainContainer = new MainContainer();
+		this._mainContainer.showTestBackground(0x0000ff);
 		Pixi.app.stage.addChild(this._mainContainer);
 	}
 
@@ -56,6 +59,22 @@ export class Main {
 	}
 
 	private alignMainContainer():void {
-		this._mainContainer.setSize(this._size.width, this._size.height);
+		let targetWidth:number = Math.max(Main.MIN_MAIN_CONTAINER_WIDTH, this._size.width);
+		let targetHeight:number = Math.max(Main.MIN_MAIN_CONTAINER_HEIGHT, this._size.height);
+		const scaleByWidth:number = this.calculateObjectScale(this._size.width, targetWidth);
+		const scaleByHeight:number = this.calculateObjectScale(this._size.height, targetHeight);
+		if (scaleByWidth < scaleByHeight) {
+			targetHeight = (targetWidth * this._size.height) / this._size.width;
+		} else if (scaleByHeight < scaleByWidth) {
+			targetWidth = (targetHeight * this._size.width) / this._size.height;
+		}
+		this._mainContainer.setSize(targetWidth, targetHeight);
+		this._mainContainer.scale.x = this._mainContainer.scale.y = Math.min(scaleByWidth, scaleByHeight);
+		this._mainContainer.x = (this._size.width - this._mainContainer.w * this._mainContainer.scale.x) / 2;
+		this._mainContainer.y = (this._size.height - this._mainContainer.h * this._mainContainer.scale.y) / 2;
+	}
+
+	private calculateObjectScale(frameSize:number, objectSize:number):number {
+		return frameSize < objectSize ? frameSize / objectSize : 1;
 	}
 }
