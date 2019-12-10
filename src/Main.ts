@@ -32,7 +32,6 @@ export class Main {
 
 	private initMainContainer():void {
 		this._mainContainer = new MainContainer();
-		this._mainContainer.showTestBackground(0x0000ff);
 		Pixi.app.stage.addChild(this._mainContainer);
 	}
 
