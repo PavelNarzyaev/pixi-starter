@@ -12,4 +12,5 @@ Easy deployment project with:
 * Run script «local-test» («npm run local-test» in terminal)
 
 ##Branches
-* Circles test - http://dolgofor.ru/pixi-starter/test1
+* Circles test 1 - http://dolgofor.ru/pixi-starter/test1
+* Circles test 2 - http://dolgofor.ru/pixi-starter/test2
