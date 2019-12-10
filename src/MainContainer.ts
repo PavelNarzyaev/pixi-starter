@@ -7,7 +7,7 @@ import Pixi from "./Pixi";
 export default class MainContainer extends Container {
 	public static readonly WIDTH:number = 700;
 	public static readonly HEIGHT:number = 350;
-	private static readonly CIRCLES_NUM:number = 30;
+	private static readonly CIRCLES_NUM:number = 100;
 	private _background:Graphics;
 	private _circles:Set<Circle> = new Set<Circle>();
 
@@ -18,14 +18,14 @@ export default class MainContainer extends Container {
 
 	private init():void {
 		this.interactive = true;
-		this.addListener("pointerdown", this.refreshCircles, this);
+		this.addListener("pointerdown", this.restart, this);
 
 		this.initBackground();
 		this.createCircles();
 		Pixi.app.ticker.add((dt:number) => this.tick(dt));
 	}
 
-	private refreshCircles():void {
+	private restart():void {
 		this.removeCircles();
 		this.createCircles();
 	}
@@ -43,7 +43,7 @@ export default class MainContainer extends Container {
 		while (i < MainContainer.CIRCLES_NUM) {
 			const circle:Circle = new Circle();
 			circle.x = genRandomInteger(circle.radius, MainContainer.WIDTH - circle.radius);
-			circle.y = genRandomInteger(circle.radius, MainContainer.HEIGHT / 2 - circle.radius);
+			circle.y = genRandomInteger(circle.radius, MainContainer.HEIGHT - circle.radius);
 			this.addChild(circle);
 			this._circles.add(circle);
 			i++;
@@ -58,6 +58,39 @@ export default class MainContainer extends Container {
 	}
 
 	private tick(dt:number):void {
-		console.log(dt);
+		this._circles.forEach((circle:Circle) => {
+			this.processCircle(
+				circle.x + circle.speedX * dt,
+				circle.radius,
+				MainContainer.WIDTH - circle.radius,
+				(newX:number) => circle.x = newX,
+				() => circle.speedX *= -1
+			);
+			this.processCircle(
+				circle.y + circle.speedY * dt,
+				circle.radius,
+				MainContainer.HEIGHT - circle.radius,
+				(newY:number) => circle.y = newY,
+				() => circle.speedY *= -1
+			);
+		});
+	}
+
+	private processCircle(
+		targetPos:number,
+		minPos:number,
+		maxPos:number,
+		setPos:(value:number) => void,
+		invertSpeed:() => void
+	):void {
+		if (targetPos < minPos) {
+			setPos(minPos + (minPos - targetPos));
+			invertSpeed();
+		} else if (targetPos > maxPos) {
+			setPos(maxPos - (targetPos - maxPos));
+			invertSpeed();
+		} else {
+			setPos(targetPos);
+		}
 	}
 }
