@@ -68,4 +68,12 @@ export default class Detail extends View {
 		this._heightArrows.y = this.h;
 		this._heightArrows.setW(this.h);
 	}
+
+	public printHeight(value:string):void {
+		this._heightArrows.setText(value);
+	}
+
+	public printWidth(value:string):void {
+		this._widthArrows.setText(value);
+	}
 }
