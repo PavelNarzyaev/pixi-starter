@@ -1,9 +1,11 @@
 import View from "./View";
 import Arrows from "./Arrows";
+import Detail from "./Detail";
 
 export default class MainContainer extends View {
 	private _horizontalArrows:Arrows;
 	private _verticalArrows:Arrows;
+	private _detail:Detail;
 
 	constructor() {
 		super();
@@ -13,6 +15,7 @@ export default class MainContainer extends View {
 		super.init();
 		this.initHorizontalArrows();
 		this.initVerticalArrows();
+		this.initDetail();
 	}
 
 	private initHorizontalArrows():void {
@@ -26,10 +29,16 @@ export default class MainContainer extends View {
 		this.addChild(this._verticalArrows);
 	}
 
+	private initDetail():void {
+		this._detail = new Detail();
+		this.addChild(this._detail);
+	}
+
 	protected applySize():void {
 		super.applySize();
 		this.alignHorizontalArrows();
 		this.alignVerticalArrows();
+		this.alignDetail();
 	}
 
 	private alignHorizontalArrows():void {
@@ -43,5 +52,11 @@ export default class MainContainer extends View {
 		this._verticalArrows.x = this.w - this._horizontalArrows.h - 30;
 		this._verticalArrows.y = Math.floor(this.h);
 		this._verticalArrows.setText("100% (" + this._verticalArrows.w + "px)")
+	}
+
+	private alignDetail():void {
+		this._detail.setSize(this.w * .3, 150);
+		this._detail.x = Math.floor((this.w - this._detail.w) / 2);
+		this._detail.y = Math.floor((this.h - this._detail.h) / 2);
 	}
 }

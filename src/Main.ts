@@ -4,8 +4,8 @@ import Application = PIXI.Application;
 import Pixi from "./Pixi";
 
 export class Main {
-	private static readonly MIN_MAIN_CONTAINER_WIDTH:number = 500;
-	private static readonly MIN_MAIN_CONTAINER_HEIGHT:number = 500;
+	private static readonly MIN_MAIN_CONTAINER_WIDTH:number = 600;
+	private static readonly MIN_MAIN_CONTAINER_HEIGHT:number = 350;
 	private _size:Rectangle;
 	private _mainContainer:MainContainer;
 

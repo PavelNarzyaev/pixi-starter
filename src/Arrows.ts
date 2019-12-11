@@ -5,7 +5,7 @@ import Text = PIXI.Text;
 import TextStyle = PIXI.TextStyle;
 
 export default class Arrows extends View {
-	private _texture:any;
+	private _texture:NineSlicePlane;
 	private _textField:Text;
 
 	constructor() {
