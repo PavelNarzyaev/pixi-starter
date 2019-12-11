@@ -13,3 +13,4 @@ Easy deployment project with:
 ## Branches
 * [ [Branch](https://github.com/PavelNarzyaev/pixi-starter/tree/test1 "Open branch") | [Watch](http://dolgofor.ru/pixi-starter/test1 "Open demo") ] Moved circles
 * [ [Branch](https://github.com/PavelNarzyaev/pixi-starter/tree/test2 "Open branch") | [Watch](http://dolgofor.ru/pixi-starter/test2 "Open demo") ] Circles with gravity
+* [ [Branch](https://github.com/PavelNarzyaev/pixi-starter/tree/test3 "Open branch") | [Watch](http://dolgofor.ru/pixi-starter/test3 "Open demo") ] Combined scale/resize system
