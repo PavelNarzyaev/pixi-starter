@@ -3,8 +3,8 @@ import Arrows from "./Arrows";
 import Detail from "./Detail";
 
 export default class MainContainer extends View {
-	private _horizontalArrows:Arrows;
-	private _verticalArrows:Arrows;
+	private _widthArrows:Arrows;
+	private _heightArrows:Arrows;
 	private _detail:Detail;
 
 	constructor() {
@@ -19,14 +19,14 @@ export default class MainContainer extends View {
 	}
 
 	private initHorizontalArrows():void {
-		this._horizontalArrows = new Arrows();
-		this.addChild(this._horizontalArrows);
+		this._widthArrows = new Arrows();
+		this.addChild(this._widthArrows);
 	}
 
 	private initVerticalArrows():void {
-		this._verticalArrows = new Arrows();
-		this._verticalArrows.rotation = -Math.PI / 2;
-		this.addChild(this._verticalArrows);
+		this._heightArrows = new Arrows();
+		this._heightArrows.rotation = -Math.PI / 2;
+		this.addChild(this._heightArrows);
 	}
 
 	private initDetail():void {
@@ -42,16 +42,16 @@ export default class MainContainer extends View {
 	}
 
 	private alignHorizontalArrows():void {
-		this._horizontalArrows.setW(this.w);
-		this._horizontalArrows.y = this.h - this._horizontalArrows.h - 30;
-		this._horizontalArrows.setText("100% (" + this._horizontalArrows.w + "px)");
+		this._widthArrows.setW(this.w);
+		this._widthArrows.y = this.h - this._widthArrows.h - 30;
+		this._widthArrows.setText("100% (" + this._widthArrows.w + "px)");
 	}
 
 	private alignVerticalArrows():void {
-		this._verticalArrows.setW(this.h);
-		this._verticalArrows.x = this.w - this._verticalArrows.h - 30;
-		this._verticalArrows.y = Math.floor(this.h);
-		this._verticalArrows.setText("100% (" + this._verticalArrows.w + "px)")
+		this._heightArrows.setW(this.h);
+		this._heightArrows.x = this.w - this._heightArrows.h - 30;
+		this._heightArrows.y = Math.floor(this.h);
+		this._heightArrows.setText("100% (" + this._heightArrows.w + "px)")
 	}
 
 	private alignDetail():void {

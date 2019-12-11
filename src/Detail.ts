@@ -6,8 +6,8 @@ export default class Detail extends View {
 	private static readonly ARROWS_OFFSET:number = 30;
 
 	private _graphics:Graphics;
-	private _topArrows:Arrows;
-	private _leftArrows:Arrows;
+	private _widthArrows:Arrows;
+	private _heightArrows:Arrows;
 
 	constructor() {
 		super();
@@ -25,14 +25,14 @@ export default class Detail extends View {
 	}
 
 	private initArrows():void {
-		this._topArrows = new Arrows();
-		this._topArrows.y = -Detail.ARROWS_OFFSET - this._topArrows.h;
-		this.addChild(this._topArrows);
+		this._widthArrows = new Arrows();
+		this._widthArrows.y = -Detail.ARROWS_OFFSET - this._widthArrows.h;
+		this.addChild(this._widthArrows);
 
-		this._leftArrows = new Arrows();
-		this._leftArrows.rotation = -Math.PI / 2;
-		this._leftArrows.x = -Detail.ARROWS_OFFSET - this._leftArrows.h;
-		this.addChild(this._leftArrows);
+		this._heightArrows = new Arrows();
+		this._heightArrows.rotation = -Math.PI / 2;
+		this._heightArrows.x = -Detail.ARROWS_OFFSET - this._heightArrows.h;
+		this.addChild(this._heightArrows);
 	}
 
 	protected applySize():void {
@@ -63,9 +63,9 @@ export default class Detail extends View {
 	}
 
 	private alignArrows():void {
-		this._topArrows.setW(this.w);
+		this._widthArrows.setW(this.w);
 
-		this._leftArrows.y = this.h;
-		this._leftArrows.setW(this.h);
+		this._heightArrows.y = this.h;
+		this._heightArrows.setW(this.h);
 	}
 }
