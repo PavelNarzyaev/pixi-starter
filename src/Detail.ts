@@ -13,8 +13,8 @@ export default class Detail extends View {
 		super();
 	}
 
-	protected init():void {
-		super.init();
+	protected onCreate():void {
+		super.onCreate();
 		this.initGraphics();
 		this.initArrows();
 	}

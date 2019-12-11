@@ -4,13 +4,17 @@ import Graphics = PIXI.Graphics;
 export default class View extends Container {
 	public w:number;
 	public h:number;
-	private _initialized:boolean = false;
+	private _onResizeInitialized:boolean = false;
 	private _testBackground:Graphics;
 	private _testBackgroundColor:number;
 	private _testBackgroundAlpha:number;
 
 	constructor() {
 		super();
+		this.onCreate();
+	}
+
+	protected onCreate():void {
 	}
 
 	public setW(value:number):void {
@@ -56,12 +60,12 @@ export default class View extends Container {
 			this._testBackground.endFill();
 		}
 
-		if (!this._initialized) {
-			this.init();
-			this._initialized = true;
+		if (!this._onResizeInitialized) {
+			this.onFirstResize();
+			this._onResizeInitialized = true;
 		}
 	}
 
-	protected init():void {
+	protected onFirstResize():void {
 	}
 }

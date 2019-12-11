@@ -15,8 +15,8 @@ export default class Arrows extends View {
 		this.h = Arrows.HEIGHT;
 	}
 
-	protected init():void {
-		super.init();
+	protected onFirstResize():void {
+		super.onFirstResize();
 		this.initTexture();
 	}
 
