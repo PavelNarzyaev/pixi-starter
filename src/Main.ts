@@ -64,9 +64,9 @@ export class Main {
 		const scaleByWidth:number = this.calculateObjectScale(this._size.width, targetWidth);
 		const scaleByHeight:number = this.calculateObjectScale(this._size.height, targetHeight);
 		if (scaleByWidth < scaleByHeight) {
-			targetHeight = (targetWidth * this._size.height) / this._size.width;
+			targetHeight = Math.floor((targetWidth * this._size.height) / this._size.width);
 		} else if (scaleByHeight < scaleByWidth) {
-			targetWidth = (targetHeight * this._size.width) / this._size.height;
+			targetWidth = Math.floor((targetHeight * this._size.width) / this._size.height);
 		}
 		this._mainContainer.setSize(targetWidth, targetHeight);
 		this._mainContainer.scale.x = this._mainContainer.scale.y = Math.min(scaleByWidth, scaleByHeight);

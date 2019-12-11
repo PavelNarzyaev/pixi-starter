@@ -8,9 +8,7 @@ export default class Arrows extends View {
 	private _texture:any;
 	private _textField:Text;
 
-	constructor(
-		private _text:string,
-	) {
+	constructor() {
 		super();
 		this.h = 9;
 	}
@@ -18,7 +16,6 @@ export default class Arrows extends View {
 	protected init():void {
 		super.init();
 		this.initTexture();
-		this.initTextField();
 	}
 
 	private initTexture():void {
@@ -27,15 +24,23 @@ export default class Arrows extends View {
 		this.addChild(this._texture);
 	}
 
-	private initTextField():void {
-		const textStyle:TextStyle = new TextStyle();
-		textStyle.fontSize = 16;
-		textStyle.fontStyle = "bold";
-		textStyle.fill = 0x3f48cc;
+	public setText(text:string):void {
+		if (!this._textField) {
+			const textStyle:TextStyle = new TextStyle();
+			textStyle.fontSize = 16;
+			textStyle.fontStyle = "bold";
+			textStyle.fill = 0x3f48cc;
 
-		this._textField = new Text(this._text, textStyle);
-		this._textField.y = -this._textField.height;
-		this.addChild(this._textField);
+			this._textField = new Text(text, textStyle);
+			this._textField.y = -this._textField.height;
+			this.addChild(this._textField);
+		} else {
+			this._textField.text = text;
+		}
+
+		if (this.w) {
+			this.alignTextField();
+		}
 	}
 
 	protected applySize():void {
@@ -49,6 +54,8 @@ export default class Arrows extends View {
 	}
 
 	private alignTextField():void {
-		this._textField.x = Math.floor((this.w - this._textField.width) / 2);
+		if (this._textField) {
+			this._textField.x = Math.floor((this.w - this._textField.width) / 2);
+		}
 	}
 }
