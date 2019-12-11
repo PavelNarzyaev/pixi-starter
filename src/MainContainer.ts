@@ -55,7 +55,7 @@ export default class MainContainer extends View {
 	}
 
 	private alignDetail():void {
-		this._detail.setSize(this.w * .3, 150);
+		this._detail.setSize(Math.floor(this.w * .3), 150);
 		this._detail.x = Math.floor((this.w - this._detail.w) / 2);
 		this._detail.y = Math.floor((this.h - this._detail.h) / 2);
 	}
