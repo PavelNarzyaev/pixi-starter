@@ -23,6 +23,7 @@ export class Main {
 
 	private initPixiApp(canvasId:string):void {
 		Pixi.app = new Application({
+			antialias: true,
 			backgroundColor: 0xffffff,
 			view: document.getElementById(canvasId) as HTMLCanvasElement,
 			// needed to avoid troubles with invisible fonts on some Android devices
@@ -69,8 +70,8 @@ export class Main {
 		}
 		this._mainContainer.setSize(targetWidth, targetHeight);
 		this._mainContainer.scale.x = this._mainContainer.scale.y = Math.min(scaleByWidth, scaleByHeight);
-		this._mainContainer.x = (this._size.width - this._mainContainer.w * this._mainContainer.scale.x) / 2;
-		this._mainContainer.y = (this._size.height - this._mainContainer.h * this._mainContainer.scale.y) / 2;
+		this._mainContainer.x = Math.floor((this._size.width - this._mainContainer.w * this._mainContainer.scale.x) / 2);
+		this._mainContainer.y = Math.floor((this._size.height - this._mainContainer.h * this._mainContainer.scale.y) / 2);
 	}
 
 	private calculateObjectScale(frameSize:number, objectSize:number):number {
