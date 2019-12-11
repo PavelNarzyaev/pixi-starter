@@ -5,12 +5,14 @@ import Text = PIXI.Text;
 import TextStyle = PIXI.TextStyle;
 
 export default class Arrows extends View {
+	public static readonly HEIGHT:number = 9;
+
 	private _texture:NineSlicePlane;
 	private _textField:Text;
 
 	constructor() {
 		super();
-		this.h = 9;
+		this.h = Arrows.HEIGHT;
 	}
 
 	protected init():void {

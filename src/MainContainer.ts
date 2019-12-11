@@ -49,7 +49,7 @@ export default class MainContainer extends View {
 
 	private alignVerticalArrows():void {
 		this._verticalArrows.setW(this.h);
-		this._verticalArrows.x = this.w - this._horizontalArrows.h - 30;
+		this._verticalArrows.x = this.w - this._verticalArrows.h - 30;
 		this._verticalArrows.y = Math.floor(this.h);
 		this._verticalArrows.setText("100% (" + this._verticalArrows.w + "px)")
 	}
