@@ -14,7 +14,7 @@ export default class MainContainer extends View {
 	}
 
 	private initHorizontalArrows():void {
-		this._horizontalArrows = new Arrows();
+		this._horizontalArrows = new Arrows("100%");
 		this.addChild(this._horizontalArrows);
 	}
 
