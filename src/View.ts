@@ -17,24 +17,24 @@ export default class View extends Container {
 	protected onCreate():void {
 	}
 
-	public setW(value:number):void {
+	public setW(value:number|string):void {
 		if (this.w !== value) {
-			this.w = value;
+			this.w = this.calculatePixels((this.parent as View).w, value);
 			this.applySize();
 		}
 	}
 
-	public setH(value:number) {
+	public setH(value:number|string) {
 		if (this.h !== value) {
-			this.h = value;
+			this.h = this.calculatePixels((this.parent as View).h, value);
 			this.applySize();
 		}
 	}
 
-	public setSize(w:number, h:number):void {
+	public setSize(w:number|string, h:number|string):void {
 		if (this.w !== w || this.h !== h) {
-			this.w = w;
-			this.h = h;
+			this.w = this.calculatePixels((this.parent as View).w, w);
+			this.h = this.calculatePixels((this.parent as View).h, h);
 			this.applySize();
 		}
 	}
@@ -68,4 +68,83 @@ export default class View extends Container {
 
 	protected onFirstResize():void {
 	}
+
+	private calculatePixels(parentSize:number, value:number|string):number {
+		if (value === undefined) {
+			return 0;
+		} else if (typeof value === 'string') {
+			return parentSize * Number(value.slice(0, -1)) / 100;
+		} else {
+			return Math.floor(value);
+		}
+	}
+
+	public align(alignment:IAlignment):void {
+		const parent:View = this.parent as View;
+		let newW:number;
+		let newH:number;
+		this.alignDirection(
+			alignment.left,
+			alignment.w,
+			alignment.right,
+			parent.w,
+			(pos:number) => { this.x = pos; },
+			(newSize) => { newW = newSize; },
+		);
+		this.alignDirection(
+			alignment.top,
+			alignment.h,
+			alignment.bottom,
+			parent.h,
+			(pos:number) => { this.y = pos; },
+			(newSize:number) => { newH = newSize; },
+		);
+		if (newW != this.w || newH != this.h) {
+			this.setSize(newW, newH);
+		}
+	}
+
+	private alignDirection(
+		beforeSize:number|string,
+		size:number|string,
+		afterSize:number|string,
+		parentSize:number,
+		setPos:(pos:number) => void,
+		setSize:(newSize:number) => void,
+	):void {
+		if (size === undefined) {
+			const pos:number = this.calculatePixels(parentSize, beforeSize);
+			setPos(pos);
+			setSize(parentSize - pos - this.calculatePixels(parentSize, afterSize));
+		} else if (afterSize === undefined) {
+			setSize(this.calculatePixels(parentSize, size));
+			setPos(this.calculatePixels(parentSize, beforeSize));
+		} else if (beforeSize === undefined) {
+			const newSize:number = this.calculatePixels(parentSize, size);
+			setSize(newSize);
+			setPos(parentSize - newSize - this.calculatePixels(parentSize, afterSize));
+		}
+	}
+
+	public center():void {
+		this.centerX();
+		this.centerY();
+	}
+
+	public centerX():void {
+		this.x = Math.floor(((this.parent as View).w - this.w) / 2);
+	}
+
+	public centerY():void {
+		this.y = Math.floor(((this.parent as View).h - this.h) / 2);
+	}
+}
+
+export interface IAlignment {
+	left?:number|string;
+	right?:number|string;
+	top?:number|string;
+	bottom?:number|string;
+	w?:number|string;
+	h?:number|string;
 }

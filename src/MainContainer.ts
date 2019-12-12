@@ -24,8 +24,11 @@ export default class MainContainer extends View {
 	}
 
 	private alignSquare():void {
-		this._square.setSize(Math.floor(this.w * .3), Math.floor(this.h * .3));
-		this._square.x = Math.floor((this.w - this._square.w) / 2);
-		this._square.y = Math.floor((this.h - this._square.h) / 2);
+		this._square.align({
+			left:150,
+			top:150,
+			right:150,
+			bottom:150,
+		});
 	}
 }
