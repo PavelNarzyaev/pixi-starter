@@ -20,6 +20,10 @@ export default class Square extends View {
 
 	protected applySize():void {
 		super.applySize();
+		this.alignGraphics();
+	}
+
+	private alignGraphics():void {
 		this._graphics.clear();
 		this._graphics.beginFill(0x0000ff);
 		this._graphics.drawRoundedRect(0, 0, this.w, this.h, 10);
