@@ -2,13 +2,15 @@ import View from "./View";
 import Square from "./Square";
 import {genRandomInteger} from "./Random";
 import Text = PIXI.Text;
+import Graphics = PIXI.Graphics;
 
 export default class MainContainer extends View {
+	private _background:Graphics;
+	private _textField:Text;
 	private _square:Square;
 	private _squareLeft:number|string;
 	private _squareW:number|string;
 	private _squareRight:number|string;
-	private _textField:Text;
 
 	constructor() {
 		super();
@@ -16,9 +18,25 @@ export default class MainContainer extends View {
 
 	protected onCreate():void {
 		super.onCreate();
+
+		this.interactive = true;
+		this.addListener("pointerdown", this.restart, this);
+
+		this.initBackground();
 		this.genAlignmentValues();
 		this.refreshText();
 		this.initSquare();
+	}
+
+	private restart():void {
+		this.genAlignmentValues();
+		this.refreshText();
+		this.alignSquare();
+	}
+
+	private initBackground():void {
+		this._background = new Graphics();
+		this.addChild(this._background);
 	}
 
 	private genAlignmentValues():void {
@@ -88,8 +106,16 @@ export default class MainContainer extends View {
 
 	protected applySize():void {
 		super.applySize();
+		this.alignBackground();
 		this.alignSquare();
 		this.alignTextField();
+	}
+
+	private alignBackground():void {
+		this._background.clear();
+		this._background.beginFill(0x000000);
+		this._background.drawRect(0, 0, this.w, this.h);
+		this._background.endFill();
 	}
 
 	private alignSquare():void {
