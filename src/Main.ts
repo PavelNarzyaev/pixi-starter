@@ -4,6 +4,8 @@ import Application = PIXI.Application;
 import Pixi from "./Pixi";
 
 export class Main {
+	private static readonly MIN_MAIN_CONTAINER_WIDTH:number = 600;
+	private static readonly MIN_MAIN_CONTAINER_HEIGHT:number = 350;
 	private _size:Rectangle;
 	private _mainContainer:MainContainer;
 
@@ -21,6 +23,7 @@ export class Main {
 
 	private initPixiApp(canvasId:string):void {
 		Pixi.app = new Application({
+			antialias: true,
 			backgroundColor: 0x000000,
 			view: document.getElementById(canvasId) as HTMLCanvasElement,
 			// needed to avoid troubles with invisible fonts on some Android devices
@@ -56,10 +59,22 @@ export class Main {
 	}
 
 	private alignMainContainer():void {
-		const scaleByWidth:number = this._size.width / MainContainer.WIDTH;
-		const scaleByHeight:number = this._size.height / MainContainer.HEIGHT;
+		let targetWidth:number = Math.max(Main.MIN_MAIN_CONTAINER_WIDTH, this._size.width);
+		let targetHeight:number = Math.max(Main.MIN_MAIN_CONTAINER_HEIGHT, this._size.height);
+		const scaleByWidth:number = this.calculateObjectScale(this._size.width, targetWidth);
+		const scaleByHeight:number = this.calculateObjectScale(this._size.height, targetHeight);
+		if (scaleByWidth < scaleByHeight) {
+			targetHeight = Math.floor((targetWidth * this._size.height) / this._size.width);
+		} else if (scaleByHeight < scaleByWidth) {
+			targetWidth = Math.floor((targetHeight * this._size.width) / this._size.height);
+		}
+		this._mainContainer.setSize(targetWidth, targetHeight);
 		this._mainContainer.scale.x = this._mainContainer.scale.y = Math.min(scaleByWidth, scaleByHeight);
-		this._mainContainer.x = (this._size.width - MainContainer.WIDTH * this._mainContainer.scale.x) / 2;
-		this._mainContainer.y = (this._size.height - MainContainer.HEIGHT * this._mainContainer.scale.y) / 2;
+		this._mainContainer.x = Math.floor((this._size.width - this._mainContainer.w * this._mainContainer.scale.x) / 2);
+		this._mainContainer.y = Math.floor((this._size.height - this._mainContainer.h * this._mainContainer.scale.y) / 2);
+	}
+
+	private calculateObjectScale(frameSize:number, objectSize:number):number {
+		return frameSize < objectSize ? frameSize / objectSize : 1;
 	}
 }
