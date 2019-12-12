@@ -49,11 +49,11 @@ export default class MainContainer extends View {
 	private genAlignmentValue():number|string {
 		if (Math.random() > .25) {
 			if (Math.random() < .5) {
-				const min:number = 1;
+				const min:number = 20;
 				const max:number = 200;
 				return genRandomInteger(min, max);
 			} else {
-				const minPercent:number = 1;
+				const minPercent:number = 5;
 				const maxPercent:number = 30;
 				return genRandomInteger(minPercent, maxPercent) + "%";
 			}
