@@ -40,13 +40,8 @@ export class Main {
 	}
 
 	private refreshSize():void {
-		if (window.outerHeight !== 0) {
-			this._size.width = window.innerWidth;
-			this._size.height = window.innerHeight;
-		} else { // needed to avoid some iOS troubles
-			this._size.width = document.body.scrollWidth;
-			this._size.height = document.body.scrollHeight;
-		}
+		this._size.width = window.innerWidth;
+		this._size.height = window.innerHeight;
 	}
 
 	private alignPixiApp():void {
