@@ -80,12 +80,7 @@ export default class MainContainer extends View {
 			" | " +
 			"right: " + this.printAlignmentValue(this._squareRight);
 		if (!this._textField) {
-			this._textField = new Text(
-				text,
-				{
-					fill: 0xffffff,
-				}
-			);
+			this._textField = new Text(text);
 			this._textField.y = 10;
 			this.addChild(this._textField);
 		} else {
@@ -113,7 +108,7 @@ export default class MainContainer extends View {
 
 	private alignBackground():void {
 		this._background.clear();
-		this._background.beginFill(0x000000);
+		this._background.beginFill(0xffffff);
 		this._background.drawRect(0, 0, this.w, this.h);
 		this._background.endFill();
 	}
