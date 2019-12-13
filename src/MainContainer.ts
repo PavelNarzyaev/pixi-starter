@@ -40,7 +40,6 @@ export default class MainContainer extends View {
 	}
 
 	private alignTextField():void {
-		this._textField.x = Math.floor((this.w - this._textField.width) / 2);
-		this._textField.y = Math.floor((this.h - this._textField.height) / 2);
+		this.center(this._textField);
 	}
 }

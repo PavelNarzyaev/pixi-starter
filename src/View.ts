@@ -79,28 +79,36 @@ export default class View extends Container {
 		}
 	}
 
-	public align(alignment:IAlignment):void {
-		const parent:View = this.parent as View;
-		let newW:number;
-		let newH:number;
+	public align(child:Container|View, alignment:IAlignment):void {
+		let newW:number = 0;
+		let newH:number = 0;
 		this.alignDirection(
 			alignment.left,
 			alignment.w,
 			alignment.right,
-			parent.w,
-			(pos:number) => { this.x = pos; },
+			this.w,
+			(pos:number) => { child.x = pos; },
 			(newSize) => { newW = newSize; },
 		);
 		this.alignDirection(
 			alignment.top,
 			alignment.h,
 			alignment.bottom,
-			parent.h,
-			(pos:number) => { this.y = pos; },
+			this.h,
+			(pos:number) => { child.y = pos; },
 			(newSize:number) => { newH = newSize; },
 		);
-		if (newW != this.w || newH != this.h) {
-			this.setSize(newW, newH);
+		if (child instanceof View) {
+			if (newW != this.w || newH != this.h) {
+				child.setSize(newW, newH);
+			}
+		} else {
+			if (newW != child.width) {
+				child.width = newW;
+			}
+			if (newH != child.height) {
+				child.height = newH;
+			}
 		}
 	}
 
@@ -126,17 +134,19 @@ export default class View extends Container {
 		}
 	}
 
-	public center():void {
-		this.centerX();
-		this.centerY();
+	public center(child:Container|View):void {
+		this.centerX(child);
+		this.centerY(child);
 	}
 
-	public centerX():void {
-		this.x = Math.floor(((this.parent as View).w - this.w) / 2);
+	public centerX(child:Container|View):void {
+		const childWidth:number = child instanceof View ? child.w : child.width;
+		child.x = Math.floor((this.w - childWidth) / 2);
 	}
 
-	public centerY():void {
-		this.y = Math.floor(((this.parent as View).h - this.h) / 2);
+	public centerY(child:Container|View):void {
+		const childHeight:number = child instanceof View ? child.h : child.height;
+		child.y = Math.floor((this.h - childHeight) / 2);
 	}
 }
 
