@@ -11,10 +11,6 @@ export default class View extends Container {
 
 	constructor() {
 		super();
-		this.onCreate();
-	}
-
-	protected onCreate():void {
 	}
 
 	public setW(value:number|string):void {

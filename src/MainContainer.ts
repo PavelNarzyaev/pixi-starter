@@ -8,10 +8,10 @@ export default class MainContainer extends View {
 
 	constructor() {
 		super();
+		this.init();
 	}
 
-	protected onCreate():void {
-		super.onCreate();
+	protected init():void {
 		this.initBackground();
 		this.initTextField();
 	}
