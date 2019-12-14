@@ -1,8 +1,8 @@
 import Graphics = PIXI.Graphics;
 import Text = PIXI.Text;
-import View from "./View";
+import View from "../core/views/View";
 
-export default class MainContainer extends View {
+export default class MainView extends View {
 	private _background:Graphics;
 	private _textField:Text;
 
