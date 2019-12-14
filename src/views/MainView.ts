@@ -1,17 +1,15 @@
 import Graphics = PIXI.Graphics;
 import View from "../core/views/View";
-import GetUserAvatar from "../requests/GetUserAvatar";
-import Sprite = PIXI.Sprite;
-import UsersManager from "../managers/UsersManager";
-import GetUserInfo from "../requests/GetUserInfo";
 import {genRandomInteger} from "../Random";
+import UserView from "./UserView";
 
 export default class MainView extends View {
 	private static readonly MIN_USER_ID:number = 1;
 	private static readonly MAX_USER_ID:number = 30;
+	private static readonly USERS_NUM:number = 5;
 
 	private _background:Graphics;
-	private _userAvatar:Sprite;
+	private _users:UserView[] = [];
 
 	constructor() {
 		super();
@@ -20,7 +18,7 @@ export default class MainView extends View {
 
 	protected init():void {
 		this.initBackground();
-		this.loadUserAvatar();
+		this.initUsers();
 	}
 
 	private initBackground():void {
@@ -28,25 +26,24 @@ export default class MainView extends View {
 		this.addChild(this._background);
 	}
 
-	private loadUserAvatar():void {
-		const userId:number = genRandomInteger(MainView.MIN_USER_ID, MainView.MAX_USER_ID);
-		new GetUserInfo(userId).createPromise()
-			.then(() => {
-				new GetUserAvatar(userId).createPromise()
-					.then(() => {
-						this._userAvatar = Sprite.from(UsersManager.getAvatarUrl(userId));
-						this.addChild(this._userAvatar);
-						if (this.w && this.h) {
-							this.alignUserAvatar();
-						}
-					});
-			});
+	private initUsers():void {
+		const ids:number[] = [];
+		while (ids.length < MainView.USERS_NUM) {
+			const id:number = genRandomInteger(MainView.MIN_USER_ID, MainView.MAX_USER_ID);
+			if (ids.indexOf(id) === -1) {
+				ids.push(id);
+				const user:UserView = new UserView(id);
+				user.setSize(UserView.WIDTH, UserView.HEIGHT);
+				this.addChild(user);
+				this._users.push(user);
+			}
+		}
 	}
 
 	protected applySize():void {
 		super.applySize();
 		this.alignBackground();
-		this.alignUserAvatar();
+		this.alignUsers();
 	}
 
 	private alignBackground():void {
@@ -56,9 +53,14 @@ export default class MainView extends View {
 		this._background.endFill();
 	}
 
-	private alignUserAvatar():void {
-		if (this._userAvatar) {
-			this.center(this._userAvatar);
-		}
+	private alignUsers():void {
+		const gap:number = 10;
+		const usersWidth:number = (UserView.WIDTH + gap) * this._users.length - gap;
+		let nextX:number = Math.floor((this.w - usersWidth) / 2);
+		this._users.forEach((user:UserView) => {
+			user.x = nextX;
+			this.centerY(user);
+			nextX += UserView.WIDTH + gap;
+		});
 	}
 }
