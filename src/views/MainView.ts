@@ -1,10 +1,17 @@
 import Graphics = PIXI.Graphics;
-import Text = PIXI.Text;
 import View from "../core/views/View";
+import GetUserAvatar from "../requests/GetUserAvatar";
+import Sprite = PIXI.Sprite;
+import UsersManager from "../managers/UsersManager";
+import GetUserInfo from "../requests/GetUserInfo";
+import {genRandomInteger} from "../Random";
 
 export default class MainView extends View {
+	private static readonly MIN_USER_ID:number = 1;
+	private static readonly MAX_USER_ID:number = 30;
+
 	private _background:Graphics;
-	private _textField:Text;
+	private _userAvatar:Sprite;
 
 	constructor() {
 		super();
@@ -13,7 +20,7 @@ export default class MainView extends View {
 
 	protected init():void {
 		this.initBackground();
-		this.initTextField();
+		this.loadUserAvatar();
 	}
 
 	private initBackground():void {
@@ -21,15 +28,25 @@ export default class MainView extends View {
 		this.addChild(this._background);
 	}
 
-	private initTextField():void {
-		this._textField = new Text("Hello!");
-		this.addChild(this._textField);
+	private loadUserAvatar():void {
+		const userId:number = genRandomInteger(MainView.MIN_USER_ID, MainView.MAX_USER_ID);
+		new GetUserInfo(userId).createPromise()
+			.then(() => {
+				new GetUserAvatar(userId).createPromise()
+					.then(() => {
+						this._userAvatar = Sprite.from(UsersManager.getAvatarUrl(userId));
+						this.addChild(this._userAvatar);
+						if (this.w && this.h) {
+							this.alignUserAvatar();
+						}
+					});
+			});
 	}
 
 	protected applySize():void {
 		super.applySize();
 		this.alignBackground();
-		this.alignTextField();
+		this.alignUserAvatar();
 	}
 
 	private alignBackground():void {
@@ -39,7 +56,9 @@ export default class MainView extends View {
 		this._background.endFill();
 	}
 
-	private alignTextField():void {
-		this.center(this._textField);
+	private alignUserAvatar():void {
+		if (this._userAvatar) {
+			this.center(this._userAvatar);
+		}
 	}
 }
