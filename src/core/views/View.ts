@@ -15,23 +15,39 @@ export default class View extends Container {
 
 	public setW(value:number|string):void {
 		if (this.w !== value) {
-			this.w = this.calculatePixels((this.parent as View).w, value);
+			this.refreshW(value);
 			this.applySize();
 		}
 	}
 
 	public setH(value:number|string) {
 		if (this.h !== value) {
-			this.h = this.calculatePixels((this.parent as View).h, value);
+			this.refreshH(value);
 			this.applySize();
 		}
 	}
 
 	public setSize(w:number|string, h:number|string):void {
 		if (this.w !== w || this.h !== h) {
-			this.w = this.calculatePixels((this.parent as View).w, w);
-			this.h = this.calculatePixels((this.parent as View).h, h);
+			this.refreshW(w);
+			this.refreshH(h);
 			this.applySize();
+		}
+	}
+
+	private refreshW(value:number|string):void {
+		if (typeof value === 'number') {
+			this.w = value;
+		} else {
+			this.w = this.calculatePixels((this.parent as View).w, value);
+		}
+	}
+
+	private refreshH(value:number|string):void {
+		if (typeof value === 'number') {
+			this.h = value;
+		} else {
+			this.h = this.calculatePixels((this.parent as View).h, value);
 		}
 	}
 
