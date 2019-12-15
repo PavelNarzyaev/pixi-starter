@@ -13,7 +13,7 @@ export default class GetUserInfo extends XhrRequest {
 		return "GetUserInfo:" + this._id;
 	}
 
-	protected getUrl():string {
+	protected createUrl():string {
 		return UsersManager.getUserUrl(this._id);
 	}
 

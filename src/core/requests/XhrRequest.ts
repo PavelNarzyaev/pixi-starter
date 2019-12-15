@@ -10,7 +10,7 @@ export default class XhrRequest extends AbstractRequest {
 	protected requestPromiseFactory():Promise<void> {
 		return new Promise<void>((resolve, reject) => {
 			const xhr:XMLHttpRequest = new XMLHttpRequest();
-			let url:string = this.getUrl();
+			let url:string = this.createUrl();
 			if (this._requestData) {
 				url += "?" + this.stringifyRequestData(this._requestData);
 			}
@@ -33,10 +33,6 @@ export default class XhrRequest extends AbstractRequest {
 	}
 
 	protected parseRequest(data:any):void {
-	}
-
-	protected getUrl():string {
-		return null;
 	}
 
 	private stringifyRequestData(data:any):string {

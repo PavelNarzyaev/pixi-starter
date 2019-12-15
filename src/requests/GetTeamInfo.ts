@@ -13,7 +13,7 @@ export default class GetTeamInfo extends XhrRequest {
 		return "GetTeamInfo:" + this._id;
 	}
 
-	protected getUrl():string {
+	protected createUrl():string {
 		return TeamsManager.getTeamUrl(this._id);
 	}
 

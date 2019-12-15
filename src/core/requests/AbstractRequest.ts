@@ -8,6 +8,10 @@ export default class AbstractRequest {
 		return  null;
 	}
 
+	protected createUrl():string {
+		return  null;
+	}
+
 	public createPromise():Promise<void> {
 		this._requestId = this.createRequestId();
 		if (this._requestId !== null) {

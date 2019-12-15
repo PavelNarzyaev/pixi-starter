@@ -3,8 +3,12 @@ import UsersManager from "../managers/UsersManager";
 
 export default class GetUserAvatar extends PixiRequest {
 	constructor(
-		private _userId:number,
+		private _id:number,
 	) {
-		super(UsersManager.getAvatarUrl(_userId));
+		super();
+	}
+
+	protected createUrl():string {
+		return UsersManager.getAvatarUrl(this._id);
 	}
 }
