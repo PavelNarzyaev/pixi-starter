@@ -1,12 +1,11 @@
-
 import Rectangle = PIXI.Rectangle;
 import Application = PIXI.Application;
-import Pixi from "./Pixi";
+import App from "./App";
 import MainView from "./views/MainView";
 
 export class Main {
-	private static readonly MIN_MAIN_CONTAINER_WIDTH:number = 800;
-	private static readonly MIN_MAIN_CONTAINER_HEIGHT:number = 500;
+	private static readonly MIN_MAIN_CONTAINER_WIDTH:number = 600;
+	private static readonly MIN_MAIN_CONTAINER_HEIGHT:number = 550;
 	private _size:Rectangle;
 	private _mainView:MainView;
 
@@ -23,7 +22,7 @@ export class Main {
 	}
 
 	private initPixiApp(canvasId:string):void {
-		Pixi.app = new Application({
+		App.pixi = new Application({
 			antialias: true,
 			backgroundColor: 0x000000,
 			view: document.getElementById(canvasId) as HTMLCanvasElement,
@@ -34,7 +33,7 @@ export class Main {
 
 	private initMainContainer():void {
 		this._mainView = new MainView();
-		Pixi.app.stage.addChild(this._mainView);
+		App.pixi.stage.addChild(this._mainView);
 	}
 
 	private resize():void {
@@ -49,9 +48,9 @@ export class Main {
 	}
 
 	private alignPixiApp():void {
-		Pixi.app.renderer.view.style.width = this._size.width + "px";
-		Pixi.app.renderer.view.style.height = this._size.height + "px";
-		Pixi.app.renderer.resize(this._size.width, this._size.height);
+		App.pixi.renderer.view.style.width = this._size.width + "px";
+		App.pixi.renderer.view.style.height = this._size.height + "px";
+		App.pixi.renderer.resize(this._size.width, this._size.height);
 	}
 
 	private alignMainContainer():void {

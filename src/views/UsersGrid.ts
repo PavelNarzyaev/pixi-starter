@@ -4,7 +4,7 @@ import {genRandomInteger} from "../Random";
 
 export default class UsersGrid extends View {
 	private static readonly MIN_USER_ID:number = 1;
-	private static readonly MAX_USER_ID:number = 30;
+	private static readonly MAX_USER_ID:number = 20;
 	private static readonly COLUMNS_NUM:number = 2;
 	private static readonly ROWS_NUM:number = 2;
 	private static readonly GAP:number = 10;

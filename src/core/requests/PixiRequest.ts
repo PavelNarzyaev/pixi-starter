@@ -9,7 +9,7 @@ export default class PixiRequest extends AbstractRequest {
 	}
 
 	protected createRequestId():string {
-		return "PixiRequest::" + this.createOrGetUrl();
+		return "PixiRequest:" + this.createOrGetUrl();
 	}
 
 	protected requestPromiseFactory():Promise<void> {

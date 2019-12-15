@@ -4,16 +4,16 @@ import GetUserInfo from "../requests/GetUserInfo";
 import GetUserAvatar from "../requests/GetUserAvatar";
 import UsersManager from "../managers/UsersManager";
 import Text = PIXI.Text;
-import Graphics = PIXI.Graphics;
 import GetTeamInfo from "../requests/GetTeamInfo";
 import TeamsManager from "../managers/TeamsManager";
 import GetTeamImage from "../requests/GetTeamImage";
+import BlockBackground from "./BlockBackground";
 
 export default class UserView extends View {
 	public static readonly WIDTH:number = 140;
 	public static readonly HEIGHT:number = 200;
 
-	private _background:Graphics;
+	private _background:BlockBackground;
 	private _avatar:Sprite;
 	private _nameField:Text;
 	private _teamField:Text;
@@ -32,7 +32,7 @@ export default class UserView extends View {
 	}
 
 	private initBackground():void {
-		this._background = new Graphics();
+		this._background = new BlockBackground();
 		this.addChild(this._background);
 	}
 
@@ -112,10 +112,7 @@ export default class UserView extends View {
 	}
 
 	private alignBackground():void {
-		this._background.clear();
-		this._background.lineStyle(2, 0xcdcdcd);
-		this._background.beginFill(0xededed);
-		this._background.drawRect(0, 0, this.w, this.h);
+		this._background.setSize(this.w, this.h);
 	}
 
 	private alignAvatar():void {

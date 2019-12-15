@@ -1,9 +1,9 @@
 import View from "../core/views/View";
-import Graphics = PIXI.Graphics;
 import Text = PIXI.Text;
+import BlockBackground from "./BlockBackground";
 
 export default class Button extends View {
-	private _background:Graphics;
+	private _background:BlockBackground;
 	private _nameField:Text;
 
 	constructor(
@@ -22,7 +22,7 @@ export default class Button extends View {
 	}
 
 	private initBackground():void {
-		this._background = new Graphics();
+		this._background = new BlockBackground();
 		this.addChild(this._background);
 	}
 
@@ -44,10 +44,7 @@ export default class Button extends View {
 	}
 
 	private alignBackground():void {
-		this._background.clear();
-		this._background.lineStyle(2, 0xcdcdcd);
-		this._background.beginFill(0xededed);
-		this._background.drawRect(0, 0, this.w, this.h);
+		this._background.setSize(this.w, this.h);
 	}
 
 	private alignNameField():void {
