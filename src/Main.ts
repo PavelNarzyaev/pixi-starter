@@ -6,7 +6,7 @@ import MainView from "./views/MainView";
 
 export class Main {
 	private static readonly MIN_MAIN_CONTAINER_WIDTH:number = 800;
-	private static readonly MIN_MAIN_CONTAINER_HEIGHT:number = 350;
+	private static readonly MIN_MAIN_CONTAINER_HEIGHT:number = 500;
 	private _size:Rectangle;
 	private _mainView:MainView;
 
