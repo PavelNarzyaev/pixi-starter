@@ -41,6 +41,18 @@ export default class UsersGrid extends View {
 		}
 	}
 
+	public refresh():void {
+		this._users.forEach((user:UserView) => {
+			user.parent.removeChild(user);
+			// user.destroy();
+		});
+		this._users.length = 0;
+		this.initUsers();
+		if (this.w && this.h) {
+			this.alignUsers();
+		}
+	}
+
 	protected applySize():void {
 		super.applySize();
 		this.alignUsers();
