@@ -12,10 +12,10 @@ export default class UsersManager {
 	}
 
 	public static getUserUrl(id:number):string {
-		return "/json/users/" + id + ".json";
+		return "json/users/" + id + ".json";
 	}
 
 	public static getAvatarUrl(id:number):string {
-		return "/img/avatars/" + UsersManager.getUer(id).avatar;
+		return "img/avatars/" + UsersManager.getUer(id).avatar;
 	}
 }

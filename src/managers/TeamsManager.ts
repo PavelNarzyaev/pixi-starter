@@ -12,10 +12,10 @@ export default class TeamsManager {
 	}
 
 	public static getTeamUrl(id:number):string {
-		return "/json/teams/" + id + ".json";
+		return "json/teams/" + id + ".json";
 	}
 
 	public static getImageUrl(id:number):string {
-		return "/img/teams/" + TeamsManager.getTeam(id).image;
+		return "img/teams/" + TeamsManager.getTeam(id).image;
 	}
 }
