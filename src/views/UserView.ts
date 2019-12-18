@@ -27,8 +27,8 @@ export default class UserView extends View {
 	}
 
 	private init():void {
-		this.preload();
 		this.initBackground();
+		this.preload().then();
 	}
 
 	private initBackground():void {
@@ -36,23 +36,19 @@ export default class UserView extends View {
 		this.addChild(this._background);
 	}
 
-	private preload():void {
-		new GetUserInfo(this._id).createPromise()
-			.then(() => {
-				this.initNameField();
-				new GetUserAvatar(this._id).createPromise()
-					.then(() => {
-						this.initAvatar();
-					});
-				new GetTeamInfo(UsersManager.getUer(this._id).team).createPromise()
-					.then(() => {
-						this.initTeamField();
-						new GetTeamImage(UsersManager.getUer(this._id).team).createPromise()
-							.then(() => {
-								this.initTeamImage();
-							});
-					});
-			});
+	private async preload():Promise<void> {
+		await new GetUserInfo(this._id).createPromise();
+		this.initNameField();
+		(async () => {
+			await new GetUserAvatar(this._id).createPromise();
+			this.initAvatar();
+		})();
+		(async () => {
+			await new GetTeamInfo(UsersManager.getUer(this._id).team).createPromise()
+			this.initTeamField();
+			await new GetTeamImage(UsersManager.getUer(this._id).team).createPromise();
+			this.initTeamImage();
+		})();
 	}
 
 	private initNameField():void {
