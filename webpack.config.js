@@ -38,6 +38,9 @@ module.exports = env => {
 					options: {
 						"presets": [
 							"@babel/preset-env"
+						],
+						"plugins": [
+							["@babel/transform-runtime"]
 						]
 					}
 				}, {

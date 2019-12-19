@@ -1,13 +1,13 @@
-import MainContainer from "./MainContainer";
 import Rectangle = PIXI.Rectangle;
 import Application = PIXI.Application;
-import Pixi from "./Pixi";
+import App from "./App";
+import MainView from "./views/MainView";
 
 export class Main {
 	private static readonly MIN_MAIN_CONTAINER_WIDTH:number = 600;
-	private static readonly MIN_MAIN_CONTAINER_HEIGHT:number = 350;
+	private static readonly MIN_MAIN_CONTAINER_HEIGHT:number = 550;
 	private _size:Rectangle;
-	private _mainContainer:MainContainer;
+	private _mainView:MainView;
 
 	constructor(canvasId:string) {
 		this.initSize();
@@ -22,7 +22,7 @@ export class Main {
 	}
 
 	private initPixiApp(canvasId:string):void {
-		Pixi.app = new Application({
+		App.pixi = new Application({
 			antialias: true,
 			backgroundColor: 0x000000,
 			view: document.getElementById(canvasId) as HTMLCanvasElement,
@@ -32,8 +32,8 @@ export class Main {
 	}
 
 	private initMainContainer():void {
-		this._mainContainer = new MainContainer();
-		Pixi.app.stage.addChild(this._mainContainer);
+		this._mainView = new MainView();
+		App.pixi.stage.addChild(this._mainView);
 	}
 
 	private resize():void {
@@ -48,9 +48,9 @@ export class Main {
 	}
 
 	private alignPixiApp():void {
-		Pixi.app.renderer.view.style.width = this._size.width + "px";
-		Pixi.app.renderer.view.style.height = this._size.height + "px";
-		Pixi.app.renderer.resize(this._size.width, this._size.height);
+		App.pixi.renderer.view.style.width = this._size.width + "px";
+		App.pixi.renderer.view.style.height = this._size.height + "px";
+		App.pixi.renderer.resize(this._size.width, this._size.height);
 	}
 
 	private alignMainContainer():void {
@@ -63,10 +63,10 @@ export class Main {
 		} else if (scaleByHeight < scaleByWidth) {
 			targetWidth = Math.floor((targetHeight * this._size.width) / this._size.height);
 		}
-		this._mainContainer.setSize(targetWidth, targetHeight);
-		this._mainContainer.scale.x = this._mainContainer.scale.y = Math.min(scaleByWidth, scaleByHeight);
-		this._mainContainer.x = Math.floor((this._size.width - this._mainContainer.w * this._mainContainer.scale.x) / 2);
-		this._mainContainer.y = Math.floor((this._size.height - this._mainContainer.h * this._mainContainer.scale.y) / 2);
+		this._mainView.setSize(targetWidth, targetHeight);
+		this._mainView.scale.x = this._mainView.scale.y = Math.min(scaleByWidth, scaleByHeight);
+		this._mainView.x = Math.floor((this._size.width - this._mainView.w * this._mainView.scale.x) / 2);
+		this._mainView.y = Math.floor((this._size.height - this._mainView.h * this._mainView.scale.y) / 2);
 	}
 
 	private calculateObjectScale(frameSize:number, objectSize:number):number {

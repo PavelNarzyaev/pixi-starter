@@ -1,17 +1,17 @@
 import Graphics = PIXI.Graphics;
+import View from "../core/views/View";
 import Text = PIXI.Text;
-import View from "./View";
 
-export default class MainContainer extends View {
+export default class MainView extends View {
 	private _background:Graphics;
 	private _textField:Text;
 
 	constructor() {
 		super();
+		this.init();
 	}
 
-	protected onCreate():void {
-		super.onCreate();
+	protected init():void {
 		this.initBackground();
 		this.initTextField();
 	}
