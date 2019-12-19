@@ -17,8 +17,8 @@ export default class GetUserInfo extends XhrRequest {
 		return UsersManager.getUserUrl(this._id);
 	}
 
-	protected parseRequest(user:IUser):void {
-		super.parseRequest(user);
+	protected parseResponse(user:IUser):void {
+		super.parseResponse(user);
 		UsersManager.addUser(user);
 	}
 }

@@ -17,8 +17,8 @@ export default class GetTeamInfo extends XhrRequest {
 		return TeamsManager.getTeamUrl(this._id);
 	}
 
-	protected parseRequest(team:ITeam):void {
-		super.parseRequest(team);
+	protected parseResponse(team:ITeam):void {
+		super.parseResponse(team);
 		TeamsManager.addTeam(team);
 	}
 }

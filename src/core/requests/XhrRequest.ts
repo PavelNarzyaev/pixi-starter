@@ -20,7 +20,7 @@ export default class XhrRequest extends AbstractRequest {
 			xhr.onreadystatechange = () => {
 				if (xhr.readyState === 4) {
 					if (xhr.status === 200) {
-						this.parseRequest(xhr.response);
+						this.parseResponse(xhr.response);
 						resolve();
 					} else {
 						// TODO: process error (xhr status)
@@ -32,7 +32,7 @@ export default class XhrRequest extends AbstractRequest {
 		});
 	}
 
-	protected parseRequest(data:any):void {
+	protected parseResponse(data:any):void {
 	}
 
 	private stringifyRequestData(data:any):string {
