@@ -1,5 +1,6 @@
 import Container = PIXI.Container;
 import Graphics = PIXI.Graphics;
+import {genRandomColor} from "../../Random";
 
 export default class View extends Container {
 	public w:number;
@@ -11,31 +12,43 @@ export default class View extends Container {
 
 	constructor() {
 		super();
-		this.onCreate();
-	}
-
-	protected onCreate():void {
 	}
 
 	public setW(value:number|string):void {
 		if (this.w !== value) {
-			this.w = this.calculatePixels((this.parent as View).w, value);
+			this.refreshW(value);
 			this.applySize();
 		}
 	}
 
 	public setH(value:number|string) {
 		if (this.h !== value) {
-			this.h = this.calculatePixels((this.parent as View).h, value);
+			this.refreshH(value);
 			this.applySize();
 		}
 	}
 
 	public setSize(w:number|string, h:number|string):void {
 		if (this.w !== w || this.h !== h) {
-			this.w = this.calculatePixels((this.parent as View).w, w);
-			this.h = this.calculatePixels((this.parent as View).h, h);
+			this.refreshW(w);
+			this.refreshH(h);
 			this.applySize();
+		}
+	}
+
+	private refreshW(value:number|string):void {
+		if (typeof value === 'number') {
+			this.w = Math.floor(value);
+		} else {
+			this.w = this.calculatePixels((this.parent as View).w, value);
+		}
+	}
+
+	private refreshH(value:number|string):void {
+		if (typeof value === 'number') {
+			this.h = Math.floor(value);
+		} else {
+			this.h = this.calculatePixels((this.parent as View).h, value);
 		}
 	}
 
@@ -43,7 +56,7 @@ export default class View extends Container {
 		if (!this._testBackground) {
 			this._testBackground = new Graphics();
 			this.addChildAt(this._testBackground, 0);
-			this._testBackgroundColor = color ? color : Math.floor(Math.random() * 0x1000000);
+			this._testBackgroundColor = color ? color : genRandomColor();
 			this._testBackgroundAlpha = alpha;
 			if (this.w && this.h) {
 				this.applySize();
@@ -135,16 +148,16 @@ export default class View extends Container {
 	}
 
 	public center(child:Container|View):void {
-		this.centerX(child);
-		this.centerY(child);
+		this.centerHorizontal(child);
+		this.centerVertical(child);
 	}
 
-	public centerX(child:Container|View):void {
+	public centerHorizontal(child:Container|View):void {
 		const childWidth:number = child instanceof View ? child.w : child.width;
 		child.x = Math.floor((this.w - childWidth) / 2);
 	}
 
-	public centerY(child:Container|View):void {
+	public centerVertical(child:Container|View):void {
 		const childHeight:number = child instanceof View ? child.h : child.height;
 		child.y = Math.floor((this.h - childHeight) / 2);
 	}
