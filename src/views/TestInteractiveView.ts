@@ -25,4 +25,21 @@ export default class TestInteractiveView extends InteractiveView {
 		this._background.beginFill(0xededed);
 		this._background.drawRect(0, 0, this.w, this.h);
 	}
+
+	protected refreshState(state:symbol):void {
+		super.refreshState(state);
+		switch (state) {
+			case InteractiveView.DEFAULT_STATE:
+				console.log("default state");
+				break;
+
+			case TestInteractiveView.OVER_STATE:
+				console.log("over state");
+				break;
+
+			case TestInteractiveView.PRESSED_STATE:
+				console.log("pressed state");
+				break;
+		}
+	}
 }

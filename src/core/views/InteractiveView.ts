@@ -8,13 +8,15 @@ export default class InteractiveView extends ViewWithListenersControl {
 	public static readonly CLICK:symbol = Symbol();
 	public static readonly PRESS:symbol = Symbol();
 	public static readonly RELEASE:symbol = Symbol();
+	public static readonly DEFAULT_STATE:symbol = Symbol();
+	public static readonly OVER_STATE:symbol = Symbol();
+	public static readonly PRESSED_STATE:symbol = Symbol();
 	private _overListenerId:number;
 	private _outListenerId:number;
 	private _downListenerId:number;
 	private _upListenerId:number;
 	private _upOutsideListenerId:number;
-
-	private _down:boolean = false;
+	private _state:symbol = InteractiveView.DEFAULT_STATE;
 
 	constructor() {
 		super();
@@ -34,8 +36,9 @@ export default class InteractiveView extends ViewWithListenersControl {
 	private pointerOverHandler():void {
 		this.offListener(this._overListenerId);
 		this.onListener(this._outListenerId);
-		if (!this._down) {
+		if (this._state != InteractiveView.PRESSED_STATE) {
 			this.onListener(this._downListenerId);
+			this.setState(InteractiveView.OVER_STATE);
 		} else {
 			this.offListener(this._upOutsideListenerId);
 			this.onListener(this._upListenerId);
@@ -44,8 +47,9 @@ export default class InteractiveView extends ViewWithListenersControl {
 
 	private pointerOutHandler():void {
 		this.offListener(this._outListenerId);
-		if (!this._down) {
+		if (this._state != InteractiveView.PRESSED_STATE) {
 			this.offListener(this._downListenerId);
+			this.setState(InteractiveView.DEFAULT_STATE);
 		} else {
 			this.offListener(this._upListenerId);
 			this.onListener(this._upOutsideListenerId);
@@ -56,22 +60,30 @@ export default class InteractiveView extends ViewWithListenersControl {
 	private pointerDownHandler():void {
 		this.offListener(this._downListenerId);
 		this.onListener(this._upListenerId);
-		this._down = true;
+		this.setState(InteractiveView.PRESSED_STATE);
 		this.emit(InteractiveView.PRESS);
 	}
 
 	private pointerUpHandler():void {
 		this.offListener(this._upListenerId);
 		this.onListener(this._downListenerId);
-		this._down = false;
+		this.setState(InteractiveView.OVER_STATE);
 		this.emit(InteractiveView.RELEASE);
 		this.emit(InteractiveView.CLICK);
 	}
 
 	private pointerUpOutsideHandler():void {
 		this.offListener(this._upOutsideListenerId);
-		this._down = false;
+		this.setState(InteractiveView.DEFAULT_STATE);
 		this.emit(InteractiveView.RELEASE);
+	}
+
+	private setState(state:symbol):void {
+		this._state = state;
+		this.refreshState(this._state);
+	}
+
+	protected refreshState(state:symbol):void {
 	}
 
 	// FIXME: temporary code
