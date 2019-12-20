@@ -3,6 +3,7 @@ import {POINTER_DOWN, POINTER_OUT, POINTER_OVER, POINTER_UP, POINTER_UP_OUTSIDE}
 import IListenerState from "../../interfaces/IListenerState";
 import IListener from "../../interfaces/IListener";
 import IEvent from "../../interfaces/IEvent";
+import IInteractiveViewState from "../../interfaces/IInteractiveViewState";
 
 export default class InteractiveView extends ViewWithListenersControl {
 	public static readonly CLICK:symbol = Symbol();
@@ -115,5 +116,14 @@ export default class InteractiveView extends ViewWithListenersControl {
 		events.push({ name:"press", symbol:InteractiveView.PRESS });
 		events.push({ name:"release", symbol:InteractiveView.RELEASE });
 		return events;
+	}
+
+	// FIXME: temporary code
+	public getStates():IInteractiveViewState[] {
+		const states:IInteractiveViewState[] = [];
+		states.push({ name:"default", symbol:InteractiveView.DEFAULT_STATE });
+		states.push({ name:"over", symbol:InteractiveView.OVER_STATE });
+		states.push({ name:"pressed", symbol:InteractiveView.PRESSED_STATE });
+		return states;
 	}
 }

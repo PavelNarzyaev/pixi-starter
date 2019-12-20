@@ -6,20 +6,26 @@ import ViewWithListenersControl from "../core/views/ViewWithListenersControl";
 import TestInteractiveView from "./TestInteractiveView";
 import ListenersBlock from "./blocks/listeners-block/ListenersBlock";
 import EventsBlock from "./blocks/events-block/EventsBlock";
+import StatesBlock from "./blocks/states-block/StatesBlock";
+import Block from "./blocks/Block";
 
 export default class MainView extends View {
 	private _background:Graphics;
 	private _interactiveView:TestInteractiveView;
 	private _listenersBlock:ListenersBlock;
 	private _eventsBlock:EventsBlock;
+	private _statesBlock:StatesBlock;
+	private _blocks:Block[] = [];
 
 	constructor() {
 		super();
 		this.initBackground();
 		this.initInteractiveView();
-		this.initListenersBlock();
+		this._listenersBlock = this.initBlock(new ListenersBlock(this._interactiveView.getListeners()));
 		this.refreshListenersBlock();
-		this.initEventsBlock();
+		this._eventsBlock = this.initBlock(new EventsBlock(this._interactiveView.getEvents()));
+		this._statesBlock = this.initBlock(new StatesBlock(this._interactiveView.getStates()));
+		this.refreshStatesBlock();
 	}
 
 	private initBackground():void {
@@ -45,6 +51,10 @@ export default class MainView extends View {
 			InteractiveView.RELEASE,
 			() => { this.interactiveViewClickHandler(InteractiveView.RELEASE); }
 		);
+		(this._interactiveView as EventEmitter).on(
+			TestInteractiveView.CHANGED_STATE,
+			() => { this.refreshStatesBlock(); }
+		);
 		this.addChild(this._interactiveView);
 	}
 
@@ -66,16 +76,15 @@ export default class MainView extends View {
 		this._eventsBlock.getContent().eventHandler(event);
 	}
 
-	private initListenersBlock():void {
-		this._listenersBlock = new ListenersBlock(this._interactiveView.getListeners());
-		this._listenersBlock.setSize(300, 230);
-		this.addChild(this._listenersBlock);
+	private refreshStatesBlock():void {
+		this._statesBlock.getContent().setState(this._interactiveView.getState());
 	}
 
-	private initEventsBlock():void {
-		this._eventsBlock = new EventsBlock(this._interactiveView.getEvents());
-		this._eventsBlock.setSize(300, 230);
-		this.addChild(this._eventsBlock);
+	private initBlock<T extends Block>(block:T):T {
+		block.setSize(230, 230);
+		this.addChild(block);
+		this._blocks.push(block);
+		return block;
 	}
 
 	protected applySize():void {
@@ -104,11 +113,19 @@ export default class MainView extends View {
 	}
 
 	private alignBlocks():void {
-		this._listenersBlock.y = this._eventsBlock.y = this._interactiveView.y + this._interactiveView.h + 50;
-
 		const gap:number = 20;
-		const blocksWidth:number = this._listenersBlock.w + gap + this._eventsBlock.w;
-		this._listenersBlock.x = Math.floor((this.w - blocksWidth) / 2);
-		this._eventsBlock.x = this._listenersBlock.x + this._listenersBlock.w + gap;
+
+		let totalBlocksWidth:number = (this._blocks.length - 1) * gap;
+		this._blocks.forEach((block:Block) => {
+			totalBlocksWidth += block.w;
+		});
+
+		const blocksY:number = this._interactiveView.y + this._interactiveView.h + 50;
+		let nextX:number = Math.floor((this.w - totalBlocksWidth) / 2);
+		this._blocks.forEach((block:Block) => {
+			block.y = blocksY;
+			block.x = nextX;
+			nextX += block.w + gap;
+		});
 	}
 }

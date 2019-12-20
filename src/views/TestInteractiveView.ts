@@ -2,7 +2,9 @@ import InteractiveView from "../core/views/InteractiveView";
 import Graphics = PIXI.Graphics;
 
 export default class TestInteractiveView extends InteractiveView {
+	public static readonly CHANGED_STATE:symbol = Symbol();
 	private _background:Graphics;
+	private _currentState:symbol = InteractiveView.DEFAULT_STATE;
 
 	constructor() {
 		super();
@@ -28,18 +30,11 @@ export default class TestInteractiveView extends InteractiveView {
 
 	protected refreshState(state:symbol):void {
 		super.refreshState(state);
-		switch (state) {
-			case InteractiveView.DEFAULT_STATE:
-				console.log("default state");
-				break;
+		this._currentState = state;
+		this.emit(TestInteractiveView.CHANGED_STATE);
+	}
 
-			case TestInteractiveView.OVER_STATE:
-				console.log("over state");
-				break;
-
-			case TestInteractiveView.PRESSED_STATE:
-				console.log("pressed state");
-				break;
-		}
+	public getState():symbol {
+		return this._currentState;
 	}
 }
