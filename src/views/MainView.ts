@@ -45,6 +45,14 @@ export default class MainView extends View {
 			InteractiveView.CLICK,
 			() => { this.interactiveViewClickHandler(); }
 		);
+		(this._interactiveView as EventEmitter).on(
+			InteractiveView.PRESS,
+			() => { console.log("press"); }
+		);
+		(this._interactiveView as EventEmitter).on(
+			InteractiveView.RELEASE,
+			() => { console.log("release"); }
+		);
 		this.addChild(this._interactiveView);
 	}
 

@@ -4,6 +4,8 @@ import IListenerState from "../../interfaces/IListenerState";
 
 export default class InteractiveView extends ViewWithListenersControl {
 	public static readonly CLICK:symbol = Symbol();
+	public static readonly PRESS:symbol = Symbol();
+	public static readonly RELEASE:symbol = Symbol();
 	private _overListenerId:number;
 	private _outListenerId:number;
 	private _downListenerId:number;
@@ -53,18 +55,21 @@ export default class InteractiveView extends ViewWithListenersControl {
 		this.offListener(this._downListenerId);
 		this.onListener(this._upListenerId);
 		this._down = true;
+		this.emit(InteractiveView.PRESS);
 	}
 
 	private pointerUpHandler():void {
 		this.offListener(this._upListenerId);
 		this.onListener(this._downListenerId);
 		this._down = false;
+		this.emit(InteractiveView.RELEASE);
 		this.emit(InteractiveView.CLICK);
 	}
 
 	private pointerUpOutsideHandler():void {
 		this.offListener(this._upOutsideListenerId);
 		this._down = false;
+		this.emit(InteractiveView.RELEASE);
 	}
 
 	// FIXME: temporary code
