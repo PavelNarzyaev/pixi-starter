@@ -1,38 +1,30 @@
 import Graphics = PIXI.Graphics;
 import View from "../core/views/View";
-import Text = PIXI.Text;
 import InteractiveView from "../core/views/InteractiveView";
 import EventEmitter = PIXI.utils.EventEmitter;
 import ViewWithListenersControl from "../core/views/ViewWithListenersControl";
 import TestInteractiveView from "./TestInteractiveView";
-import IListenerState from "../interfaces/IListenerState";
+import ListenersBlock from "./blocks/listeners-block/ListenersBlock";
+import EventsBlock from "./blocks/events-block/EventsBlock";
 
 export default class MainView extends View {
 	private _background:Graphics;
-	private _clickField:Text;
-	private _clickTimerId:number;
 	private _interactiveView:TestInteractiveView;
-	private _listenersTitleField:Text;
-	private _listenersFields:Text[] = [];
-	private _dirty:boolean = false;
+	private _listenersBlock:ListenersBlock;
+	private _eventsBlock:EventsBlock;
 
 	constructor() {
 		super();
 		this.initBackground();
-		this.initClickField();
 		this.initInteractiveView();
-		this.initListenersTitleField();
-		this.refreshListenersFields();
+		this.initListenersBlock();
+		this.refreshListenersBlock();
+		this.initEventsBlock();
 	}
 
 	private initBackground():void {
 		this._background = new Graphics();
 		this.addChild(this._background);
-	}
-
-	private initClickField():void {
-		this._clickField = new Text("CLICK EVENT", { fill:0xe5e5e5 });
-		this.addChild(this._clickField);
 	}
 
 	private initInteractiveView():void {
@@ -43,71 +35,54 @@ export default class MainView extends View {
 		);
 		(this._interactiveView as EventEmitter).on(
 			InteractiveView.CLICK,
-			() => { this.interactiveViewClickHandler(); }
+			() => { this.interactiveViewClickHandler(InteractiveView.CLICK); }
 		);
 		(this._interactiveView as EventEmitter).on(
 			InteractiveView.PRESS,
-			() => { console.log("press"); }
+			() => { this.interactiveViewClickHandler(InteractiveView.PRESS); }
 		);
 		(this._interactiveView as EventEmitter).on(
 			InteractiveView.RELEASE,
-			() => { console.log("release"); }
+			() => { this.interactiveViewClickHandler(InteractiveView.RELEASE); }
 		);
 		this.addChild(this._interactiveView);
 	}
 
 	private interactiveViewChangeHandler():void {
-		if (!this._dirty) {
-			this._dirty = true;
+		if (!this._listenersBlock.dirty) {
+			this._listenersBlock.dirty = true;
 			window.setTimeout(() => {
-				this.refreshListenersFields();
-				this._dirty = false;
+				this.refreshListenersBlock();
+				this._listenersBlock.dirty = false;
 			}, 0);
 		}
 	}
 
-	private interactiveViewClickHandler():void {
-		if (this._clickTimerId) {
-			window.clearTimeout(this._clickTimerId);
-		} else {
-			this._clickField.style = { fill:0x00ff00 };
-		}
-		this._clickTimerId = window.setTimeout(() => {
-			this._clickTimerId = null;
-			this._clickField.style = { fill:0xe5e5e5 };
-		}, 500);
+	private refreshListenersBlock():void {
+		this._listenersBlock.getContent().refreshStates(this._interactiveView.getListenersStates());
 	}
 
-	private initListenersTitleField():void {
-		this._listenersTitleField = new Text("Event listeners:");
-		this.addChild(this._listenersTitleField);
+	private interactiveViewClickHandler(event:symbol):void {
+		this._eventsBlock.getContent().eventHandler(event);
 	}
 
-	private refreshListenersFields():void {
-		this._interactiveView.createListenersStates().forEach((state:IListenerState, i:number) => {
-			let field:Text;
-			const fill:number = state.added ? 0x00ff00 : 0xe5e5e5;
-			if (i < this._listenersFields.length) {
-				field = this._listenersFields[i];
-				field.style.fill = fill;
-			} else {
-				field = new Text(state.name, { fill });
-				this.addChild(field);
-				this._listenersFields.push(field);
-			}
-		});
-		if (this.w && this.h) {
-			this.alignListenersFields();
-		}
+	private initListenersBlock():void {
+		this._listenersBlock = new ListenersBlock(this._interactiveView.getListeners());
+		this._listenersBlock.setSize(300, 230);
+		this.addChild(this._listenersBlock);
+	}
+
+	private initEventsBlock():void {
+		this._eventsBlock = new EventsBlock(this._interactiveView.getEvents());
+		this._eventsBlock.setSize(300, 230);
+		this.addChild(this._eventsBlock);
 	}
 
 	protected applySize():void {
 		super.applySize();
 		this.alignBackground();
-		this.alignClickField();
 		this.alignInteractiveView();
-		this.alignListenersTitleField();
-		this.alignListenersFields();
+		this.alignBlocks();
 	}
 
 	private alignBackground():void {
@@ -117,33 +92,23 @@ export default class MainView extends View {
 		this._background.endFill();
 	}
 
-	private alignClickField():void {
-		this._clickField.y = 50;
-		this.centerHorizontal(this._clickField);
-	}
-
 	private alignInteractiveView():void {
 		this.align(this._interactiveView,
 			{
 				left: 100,
 				right: 100,
-				top: 100,
-				h: 200,
+				top: 50,
+				h: 150,
 			}
 		)
 	}
 
-	private alignListenersTitleField():void {
-		this._listenersTitleField.x = 120;
-		this._listenersTitleField.y = this._interactiveView.y + this._interactiveView.h + 50;
-	}
+	private alignBlocks():void {
+		this._listenersBlock.y = this._eventsBlock.y = this._interactiveView.y + this._interactiveView.h + 50;
 
-	private alignListenersFields():void {
-		let nextY:number = this._listenersTitleField.y + this._listenersTitleField.height;
-		this._listenersFields.forEach((field:Text) => {
-			field.x = this._listenersTitleField.x;
-			field.y = nextY;
-			nextY += field.height;
-		});
+		const gap:number = 20;
+		const blocksWidth:number = this._listenersBlock.w + gap + this._eventsBlock.w;
+		this._listenersBlock.x = Math.floor((this.w - blocksWidth) / 2);
+		this._eventsBlock.x = this._listenersBlock.x + this._listenersBlock.w + gap;
 	}
 }

@@ -1,6 +1,8 @@
 import ViewWithListenersControl from "./ViewWithListenersControl";
 import {POINTER_DOWN, POINTER_OUT, POINTER_OVER, POINTER_UP, POINTER_UP_OUTSIDE} from "../../PointerEvents";
 import IListenerState from "../../interfaces/IListenerState";
+import IListener from "../../interfaces/IListener";
+import IEvent from "../../interfaces/IEvent";
 
 export default class InteractiveView extends ViewWithListenersControl {
 	public static readonly CLICK:symbol = Symbol();
@@ -73,13 +75,33 @@ export default class InteractiveView extends ViewWithListenersControl {
 	}
 
 	// FIXME: temporary code
-	public createListenersStates():IListenerState[] {
+	public getListeners():IListener[] {
+		const listeners:IListener[] = [];
+		listeners.push({ name:"over", id:this._overListenerId });
+		listeners.push({ name:"out", id:this._outListenerId });
+		listeners.push({ name:"down", id:this._downListenerId });
+		listeners.push({ name:"up", id:this._upListenerId });
+		listeners.push({ name:"up outside", id:this._upOutsideListenerId });
+		return listeners;
+	}
+
+	// FIXME: temporary code
+	public getListenersStates():IListenerState[] {
 		const states:IListenerState[] = [];
-		states.push({ name:"over", added:this.getListenerState(this._overListenerId) });
-		states.push({ name:"out", added:this.getListenerState(this._outListenerId) });
-		states.push({ name:"down", added:this.getListenerState(this._downListenerId) });
-		states.push({ name:"up", added:this.getListenerState(this._upListenerId) });
-		states.push({ name:"up outside", added:this.getListenerState(this._upOutsideListenerId) });
+		states.push({ id:this._overListenerId, added:this.getListenerState(this._overListenerId) });
+		states.push({ id:this._outListenerId, added:this.getListenerState(this._outListenerId) });
+		states.push({ id:this._downListenerId, added:this.getListenerState(this._downListenerId) });
+		states.push({ id:this._upListenerId, added:this.getListenerState(this._upListenerId) });
+		states.push({ id:this._upOutsideListenerId, added:this.getListenerState(this._upOutsideListenerId) });
 		return states;
+	}
+
+	// FIXME: temporary code
+	public getEvents():IEvent[] {
+		const events:IEvent[] = [];
+		events.push({ name:"click", symbol:InteractiveView.CLICK });
+		events.push({ name:"press", symbol:InteractiveView.PRESS });
+		events.push({ name:"release", symbol:InteractiveView.RELEASE });
+		return events;
 	}
 }

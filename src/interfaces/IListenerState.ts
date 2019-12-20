@@ -1,4 +1,4 @@
 export default interface IListenerState {
-	name:string;
+	id:number;
 	added:boolean;
 }
