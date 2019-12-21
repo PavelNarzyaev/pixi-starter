@@ -18,12 +18,15 @@ export default class InteractiveView extends ViewWithListenersControl {
 	private _upListenerId:number;
 	private _upOutsideListenerId:number;
 	private _state:symbol = InteractiveView.DEFAULT_STATE;
+	private _over:boolean = false;
+	private _down:boolean = false;
 
 	constructor() {
 		super();
 		this.interactive = true;
 		this.initListeners();
 		this.onListener(this._overListenerId);
+		this.onListener(this._downListenerId);
 	}
 
 	private initListeners():void {
@@ -35,46 +38,51 @@ export default class InteractiveView extends ViewWithListenersControl {
 	}
 
 	private pointerOverHandler():void {
+		this._over = true;
 		this.offListener(this._overListenerId);
 		this.onListener(this._outListenerId);
-		if (this._state != InteractiveView.PRESSED_STATE) {
-			this.onListener(this._downListenerId);
+		if (!this._down) {
 			this.setState(InteractiveView.OVER_STATE);
-		} else {
-			this.offListener(this._upOutsideListenerId);
-			this.onListener(this._upListenerId);
 		}
 	}
 
 	private pointerOutHandler():void {
+		this._over = false;
 		this.offListener(this._outListenerId);
-		if (this._state != InteractiveView.PRESSED_STATE) {
-			this.offListener(this._downListenerId);
-			this.setState(InteractiveView.DEFAULT_STATE);
-		} else {
-			this.offListener(this._upListenerId);
-			this.onListener(this._upOutsideListenerId);
-		}
 		this.onListener(this._overListenerId);
+		if (!this._down) {
+			this.setState(InteractiveView.DEFAULT_STATE);
+		}
 	}
 
 	private pointerDownHandler():void {
+		this._down = true;
 		this.offListener(this._downListenerId);
 		this.onListener(this._upListenerId);
+		this.onListener(this._upOutsideListenerId);
 		this.setState(InteractiveView.PRESSED_STATE);
 		this.emit(InteractiveView.PRESS);
 	}
 
 	private pointerUpHandler():void {
+		this._down = false;
 		this.offListener(this._upListenerId);
+		this.offListener(this._upOutsideListenerId);
 		this.onListener(this._downListenerId);
-		this.setState(InteractiveView.OVER_STATE);
+		if (this._over) {
+			this.setState(InteractiveView.OVER_STATE);
+		} else {
+			this.setState(InteractiveView.DEFAULT_STATE);
+		}
 		this.emit(InteractiveView.RELEASE);
 		this.emit(InteractiveView.CLICK);
 	}
 
 	private pointerUpOutsideHandler():void {
+		this._down = false;
+		this.offListener(this._upListenerId);
 		this.offListener(this._upOutsideListenerId);
+		this.onListener(this._downListenerId);
 		this.setState(InteractiveView.DEFAULT_STATE);
 		this.emit(InteractiveView.RELEASE);
 	}
