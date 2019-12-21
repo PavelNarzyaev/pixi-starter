@@ -61,10 +61,10 @@ export default class MainView extends View {
 	private interactiveViewChangeHandler():void {
 		if (!this._listenersBlock.dirty) {
 			this._listenersBlock.dirty = true;
-			window.setTimeout(() => {
+			requestAnimationFrame(() => {
 				this.refreshListenersBlock();
 				this._listenersBlock.dirty = false;
-			}, 0);
+			});
 		}
 	}
 
