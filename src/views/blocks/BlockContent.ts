@@ -4,7 +4,7 @@ import Text = PIXI.Text;
 
 export default class BlockContent extends View {
 	private _background:Graphics;
-	private _fields:Text[] = [];
+	private _fieldByKey:Map<any, Text> = new Map<any, Text>();
 
 	constructor(
 		private _defaultFill:number = null,
@@ -21,11 +21,14 @@ export default class BlockContent extends View {
 		this.addChild(this._background);
 	}
 
-	protected createField(text:string):Text {
+	protected createField(text:string, key:any):void {
 		const field:Text = new Text(text, { fill:this._defaultFill })
 		this.addChild(field);
-		this._fields.push(field);
-		return field;
+		this._fieldByKey.set(key, field);
+	}
+
+	protected getFieldByKey(key:any):Text {
+		return this._fieldByKey.get(key);
 	}
 
 	protected applySize():void {
@@ -42,7 +45,7 @@ export default class BlockContent extends View {
 
 	private alignFields():void {
 		let nextY:number = 10;
-		this._fields.forEach((listenerField:Text) => {
+		this._fieldByKey.forEach((listenerField:Text) => {
 			listenerField.x = 30;
 			listenerField.y = nextY;
 			nextY += listenerField.height;

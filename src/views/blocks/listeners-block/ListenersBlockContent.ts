@@ -1,21 +1,18 @@
 import IListener from "../../../interfaces/IListener";
-import Text = PIXI.Text;
 import BlockContent from "../BlockContent";
 import IListenerState from "../../../interfaces/IListenerState";
 
 export default class ListenersBlockContent extends BlockContent {
-	private _fieldById:Map<number, Text> = new Map<number, Text>();
-
 	constructor(listeners:IListener[]) {
 		super();
 		listeners.forEach((listener:IListener) => {
-			this._fieldById.set(listener.id, this.createField(listener.name));
+			this.createField(listener.name, listener.id);
 		});
 	}
 
 	public refreshStates(states:IListenerState[]):void {
 		states.forEach((state:IListenerState) => {
-			this._fieldById.get(state.id).style.fill = state.added ? this.getActiveFill() : this.getDefaultFill();
+			this.getFieldByKey(state.id).style.fill = state.added ? this.getActiveFill() : this.getDefaultFill();
 		});
 	}
 }

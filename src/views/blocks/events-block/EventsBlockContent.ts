@@ -6,7 +6,6 @@ import Color from "../../../Color";
 
 export default class EventsBlockContent extends BlockContent {
 	private static readonly ANIMATION_TIME:number = 30;
-	private _fieldByEvent:Map<symbol, Text> = new Map<symbol, Text>();
 	private _tickByField:Map<Text, number> = new Map<Text, number>();
 	private _colorByField:Map<Text, Color> = new Map<Text, Color>();
 	private _defaultFillColor:Color;
@@ -15,12 +14,12 @@ export default class EventsBlockContent extends BlockContent {
 		super(null, 0x0000ff);
 		this._defaultFillColor = new Color(this.getDefaultFill());
 		events.forEach((event:IEvent) => {
-			this._fieldByEvent.set(event.symbol, this.createField(event.name));
+			this.createField(event.name, event.symbol);
 		});
 	}
 
 	public eventHandler(event:symbol):void {
-		const field:Text = this._fieldByEvent.get(event);
+		const field:Text = this.getFieldByKey(event);
 		this._tickByField.set(field, EventsBlockContent.ANIMATION_TIME);
 		const color:Color = new Color(this.getActiveFill());
 		this._colorByField.set(field, color);
