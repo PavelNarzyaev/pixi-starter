@@ -7,7 +7,7 @@ export default class EventsBlockContent extends BlockContent {
 	private _timerByEvent:Map<symbol, number> = new Map<symbol, number>();
 
 	constructor(events:IEvent[]) {
-		super();
+		super(null, 0x0000ff);
 		events.forEach((event:IEvent) => {
 			this._fieldByEvent.set(event.symbol, this.createField(event.name));
 		});
@@ -17,15 +17,15 @@ export default class EventsBlockContent extends BlockContent {
 		if (this._timerByEvent.has(event)) {
 			window.clearTimeout(this._timerByEvent.get(event));
 		} else {
-			this.fillField(this._fieldByEvent.get(event), true);
+			this._fieldByEvent.get(event).style.fill = this.getActiveFill();
 		}
 		this._timerByEvent.set(
 			event,
 			window.setTimeout(() => {
 				this._timerByEvent.delete(event);
-				this.fillField(this._fieldByEvent.get(event), false);
+				this._fieldByEvent.get(event).style.fill = this.getDefaultFill();
 			},
-			500)
+			250)
 		);
 	}
 }

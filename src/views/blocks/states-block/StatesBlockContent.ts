@@ -15,9 +15,9 @@ export default class StatesBlockContent extends BlockContent {
 
 	public setState(state:symbol):void {
 		if (this._currentState) {
-			this.fillField(this._fieldBySymbol.get(this._currentState), false);
+			this._fieldBySymbol.get(this._currentState).style.fill = this.getDefaultFill();
 		}
 		this._currentState = state;
-		this.fillField(this._fieldBySymbol.get(this._currentState), true);
+		this._fieldBySymbol.get(this._currentState).style.fill = this.getActiveFill();
 	}
 }

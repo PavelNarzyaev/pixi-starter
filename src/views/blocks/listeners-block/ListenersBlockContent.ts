@@ -15,7 +15,7 @@ export default class ListenersBlockContent extends BlockContent {
 
 	public refreshStates(states:IListenerState[]):void {
 		states.forEach((state:IListenerState) => {
-			this.fillField(this._fieldById.get(state.id), state.added);
+			this._fieldById.get(state.id).style.fill = state.added ? this.getActiveFill() : this.getDefaultFill();
 		});
 	}
 }

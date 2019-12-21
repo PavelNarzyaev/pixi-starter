@@ -3,13 +3,16 @@ import Graphics = PIXI.Graphics;
 import Text = PIXI.Text;
 
 export default class BlockContent extends View {
-	private static readonly DEFAULT_FILL:number = 0xe5e5e5;
-	private static readonly ACTIVE_FILL:number = 0x00ff00;
 	private _background:Graphics;
 	private _fields:Text[] = [];
 
-	constructor() {
+	constructor(
+		private _defaultFill:number = null,
+		private _activeFill:number = null,
+	) {
 		super();
+		this._defaultFill = this._defaultFill !== null ? this._defaultFill : 0xe5e5e5;
+		this._activeFill = this._activeFill !== null ? this._activeFill : 0x00ff00;
 		this.initBackground();
 	}
 
@@ -19,7 +22,7 @@ export default class BlockContent extends View {
 	}
 
 	protected createField(text:string):Text {
-		const field:Text = new Text(text, { fill:BlockContent.DEFAULT_FILL })
+		const field:Text = new Text(text, { fill:this._defaultFill })
 		this.addChild(field);
 		this._fields.push(field);
 		return field;
@@ -46,7 +49,11 @@ export default class BlockContent extends View {
 		});
 	}
 
-	protected fillField(field:Text, active:boolean):void {
-		field.style.fill = active ? BlockContent.ACTIVE_FILL : BlockContent.DEFAULT_FILL;
+	protected getDefaultFill():number {
+		return this._defaultFill;
+	}
+
+	protected getActiveFill():number {
+		return this._activeFill;
 	}
 }
