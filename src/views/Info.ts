@@ -44,7 +44,10 @@ export default class Info extends View {
 	private markAsDirty():void {
 		if (!this._dirty) {
 			this._dirty = true;
-			window.setTimeout(() => { this.refreshField(); }, 0);
+			requestAnimationFrame(() => {
+				this.refreshField();
+				this._dirty = false;
+			});
 		}
 	}
 
@@ -59,7 +62,6 @@ export default class Info extends View {
 				this._field.text += requestId;
 			});
 		}
-		this._dirty = false;
 	}
 
 	protected applySize():void {
