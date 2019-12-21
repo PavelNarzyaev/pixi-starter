@@ -23,7 +23,7 @@ export class Main {
 
 	private initPixiApp(canvasId:string):void {
 		App.pixi = new Application({
-			antialias: true,
+			antialias: false,
 			backgroundColor: 0x000000,
 			view: document.getElementById(canvasId) as HTMLCanvasElement,
 			// needed to avoid troubles with invisible fonts on some Android devices
