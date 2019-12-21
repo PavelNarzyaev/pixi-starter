@@ -16,3 +16,4 @@ Easy deployment project with:
 * [ [Branch](https://github.com/PavelNarzyaev/pixi-starter/tree/test3 "Open branch") | [Watch](http://dolgofor.ru/pixi-starter/test3 "Open demo") ] Combined scale/resize system
 * [ [Branch](https://github.com/PavelNarzyaev/pixi-starter/tree/test4 "Open branch") | [Watch](http://dolgofor.ru/pixi-starter/test4 "Open demo") ] Simple layout
 * [ [Branch](https://github.com/PavelNarzyaev/pixi-starter/tree/test5 "Open branch") | [Watch](http://dolgofor.ru/pixi-starter/test5 "Open demo") ] Requests cache
+* [ [Branch](https://github.com/PavelNarzyaev/pixi-starter/tree/test6 "Open branch") | [Watch](http://dolgofor.ru/pixi-starter/test6 "Open demo") ] Interactive view
