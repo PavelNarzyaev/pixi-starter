@@ -1,10 +1,10 @@
 import Graphics = PIXI.Graphics;
 import View from "../core/views/View";
-import ColoredInteractiveView from "../core/views/ColoredInteractiveView";
+import NamedButton from "../core/views/NamedButton";
 
 export default class MainView extends View {
 	private _background:Graphics;
-	private _button:ColoredInteractiveView;
+	private _button:NamedButton;
 
 	constructor() {
 		super();
@@ -18,8 +18,8 @@ export default class MainView extends View {
 	}
 
 	private initButton():void {
-		this._button = new ColoredInteractiveView();
-		this._button.setSize(100, 100);
+		this._button = new NamedButton("Button");
+		this._button.setSize(300, 80);
 		this.addChild(this._button);
 	}
 
