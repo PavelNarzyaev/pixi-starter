@@ -17,7 +17,11 @@ export default class GraphicsView extends View {
 		this._lineWidth = lineWidth !== undefined ? lineWidth : 0;
 		this._lineColor = lineColor !== undefined ? lineColor : 0;
 		this._roundCorners = roundCorners !== undefined ? roundCorners : 0;
-		this.initBackground();
+	}
+
+	protected init():void {
+		super.init();
+		this._background = this.addChild(new Graphics());
 	}
 
 	public setFillColor(value:number):void {
@@ -43,11 +47,6 @@ export default class GraphicsView extends View {
 	public setRoundCorners(value:number):void {
 		this._roundCorners = value;
 		this.markAsDirty();
-	}
-
-	private initBackground():void {
-		this._background = new Graphics();
-		this.addChild(this._background);
 	}
 
 	protected applySize():void {

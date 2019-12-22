@@ -13,8 +13,8 @@ export default class InteractiveView extends View {
 	private _down:boolean = false;
 	private _dirty:boolean = false;
 
-	constructor() {
-		super();
+	protected init():void {
+		super.init();
 		this.interactive = true;
 		this._currentState = InteractiveView.DEFAULT_STATE;
 		this.on(POINTER_OVER, this.pointerOverHandler, this);

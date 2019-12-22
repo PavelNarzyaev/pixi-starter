@@ -7,9 +7,12 @@ export default class CheckBox extends SelectableView {
 
 	private _background:GraphicsView;
 
-	constructor() {
-		super();
-		this.initBackground();
+	protected init():void {
+		super.init();
+
+		this._background = this.addChild(new GraphicsView());
+		this._background.setLineWidth(2);
+
 		this.addListener(
 			CheckBox.CLICK,
 			() => {
@@ -19,17 +22,11 @@ export default class CheckBox extends SelectableView {
 		);
 	}
 
-	setSelected(value:boolean):void {
+	public setSelected(value:boolean):void {
 		if (this.getSelected() !== value) {
 			super.setSelected(value);
 			this.emit(CheckBox.CHANGE);
 		}
-	}
-
-	private initBackground():void {
-		this._background = new GraphicsView();
-		this._background.setLineWidth(2);
-		this.addChild(this._background);
 	}
 
 	protected applySize():void {

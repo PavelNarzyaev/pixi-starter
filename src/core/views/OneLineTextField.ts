@@ -15,8 +15,7 @@ export default class OneLineTextField extends View {
 		const fontSize:number = Math.floor(this.h * .9);
 		if (fontSize > 0) {
 			if (!this._field) {
-				this._field = new Text(this._text);
-				this.addChild(this._field);
+				this._field = this.addChild(new Text(this._text));
 			}
 			this._field.style.fontSize = fontSize;
 			this._field.text = this._text;

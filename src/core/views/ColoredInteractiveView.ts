@@ -4,18 +4,15 @@ import GraphicsView from "./GraphicsView";
 export default class ColoredInteractiveView extends InteractiveView {
 	private _background:GraphicsView;
 
-	constructor() {
-		super();
-		this.buttonMode = true;
-		this.initBackground();
-	}
+	protected init():void {
+		super.init();
 
-	private initBackground():void {
-		this._background = new GraphicsView();
+		this.buttonMode = true;
+
+		this._background = this.addChild(new GraphicsView());
 		this._background.setLineColor(0xbfbfbf);
 		this._background.setLineWidth(2);
 		this._background.setRoundCorners(20);
-		this.addChild(this._background);
 	}
 
 	protected refreshState():void {

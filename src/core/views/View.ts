@@ -10,10 +10,6 @@ export default class View extends Container {
 	private _testBackgroundColor:number;
 	private _testBackgroundAlpha:number;
 
-	constructor() {
-		super();
-	}
-
 	public setW(value:number|string):void {
 		const newW:number = this.calculateSize(value, () => (this.parent as View).w);
 		if (this.w !== newW) {
@@ -52,11 +48,11 @@ export default class View extends Container {
 		if (!this._testBackground) {
 			this._testBackground = new Graphics();
 			this.addChildAt(this._testBackground, 0);
-			this._testBackgroundColor = color ? color : genRandomColor();
-			this._testBackgroundAlpha = alpha;
-			if (this.w && this.h) {
-				this.applySize();
-			}
+		}
+		this._testBackgroundColor = color ? color : genRandomColor();
+		this._testBackgroundAlpha = alpha;
+		if (this.w && this.h) {
+			this.applySize();
 		}
 	}
 
@@ -69,12 +65,12 @@ export default class View extends Container {
 		}
 
 		if (!this._onResizeInitialized) {
-			this.onFirstResize();
+			this.init();
 			this._onResizeInitialized = true;
 		}
 	}
 
-	protected onFirstResize():void {
+	protected init():void {
 	}
 
 	private calculatePixels(parentSize:number, value:number|string):number {

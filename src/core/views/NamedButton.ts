@@ -9,12 +9,11 @@ export default class NamedButton extends ColoredInteractiveView {
 		private _name:string,
 	) {
 		super();
-		this.initTextField();
 	}
 
-	private initTextField():void {
-		this._textField = new OneLineTextField(this._name);
-		this.addChild(this._textField);
+	protected init():void {
+		super.init();
+		this._textField = this.addChild(new OneLineTextField(this._name));
 	}
 
 	protected getColor():number {
@@ -35,10 +34,6 @@ export default class NamedButton extends ColoredInteractiveView {
 
 	protected applySize():void {
 		super.applySize();
-		this.alignTextField();
-	}
-
-	private alignTextField():void {
 		this._textField.setSize("80%", "50%");
 		this.center(this._textField);
 	}
