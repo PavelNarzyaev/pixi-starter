@@ -1,10 +1,10 @@
-import Graphics = PIXI.Graphics;
 import View from "../core/views/View";
 import NamedButton from "../core/views/NamedButton";
 import CheckBox from "../core/views/CheckBox";
+import GraphicsView from "../core/views/GraphicsView";
 
 export default class MainView extends View {
-	private _background:Graphics;
+	private _background:GraphicsView;
 	private _button:NamedButton;
 	private _checkBox:CheckBox;
 
@@ -16,7 +16,7 @@ export default class MainView extends View {
 	}
 
 	private initBackground():void {
-		this._background = new Graphics();
+		this._background = new GraphicsView(0xffffff);
 		this.addChild(this._background);
 	}
 
@@ -49,8 +49,6 @@ export default class MainView extends View {
 	}
 
 	private alignBackground():void {
-		this._background.clear();
-		this._background.beginFill(0xffffff);
-		this._background.drawRect(0, 0, this.w, this.h);
+		this._background.setSize(this.w, this.h);
 	}
 }

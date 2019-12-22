@@ -1,11 +1,11 @@
 import SelectableView from "./SelectableView";
-import Graphics = PIXI.Graphics;
 import InteractiveView from "./InteractiveView";
+import GraphicsView from "./GraphicsView";
 
 export default class CheckBox extends SelectableView {
 	public static CHANGE:symbol = Symbol();
 
-	private _background:Graphics;
+	private _background:GraphicsView;
 
 	constructor() {
 		super();
@@ -27,7 +27,8 @@ export default class CheckBox extends SelectableView {
 	}
 
 	private initBackground():void {
-		this._background = new Graphics();
+		this._background = new GraphicsView();
+		this._background.setLineWidth(2);
 		this.addChild(this._background);
 	}
 
@@ -42,10 +43,8 @@ export default class CheckBox extends SelectableView {
 	}
 
 	private redrawBackground():void {
-		this._background.clear();
-		this._background.lineStyle(2);
-		this._background.beginFill(this.getBackgroundColor());
-		this._background.drawRect(0, 0, this.w, this.h);
+		this._background.setFillColor(this.getBackgroundColor());
+		this._background.setSize(this.w, this.h);
 	}
 
 	private getBackgroundColor():number {

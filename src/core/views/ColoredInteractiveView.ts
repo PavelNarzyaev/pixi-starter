@@ -1,8 +1,8 @@
 import InteractiveView from "./InteractiveView";
-import Graphics = PIXI.Graphics;
+import GraphicsView from "./GraphicsView";
 
 export default class ColoredInteractiveView extends InteractiveView {
-	private _background:Graphics;
+	private _background:GraphicsView;
 
 	constructor() {
 		super();
@@ -11,7 +11,10 @@ export default class ColoredInteractiveView extends InteractiveView {
 	}
 
 	private initBackground():void {
-		this._background = new Graphics();
+		this._background = new GraphicsView();
+		this._background.setLineColor(0xbfbfbf);
+		this._background.setLineWidth(2);
+		this._background.setRoundCorners(20);
 		this.addChild(this._background);
 	}
 
@@ -26,10 +29,8 @@ export default class ColoredInteractiveView extends InteractiveView {
 	}
 
 	private redrawBackground():void {
-		this._background.clear();
-		this._background.lineStyle(2, 0xbfbfbf);
-		this._background.beginFill(this.getColor());
-		this._background.drawRoundedRect(0, 0, this.w, this.h, 20);
+		this._background.setFillColor(this.getColor());
+		this._background.setSize(this.w, this.h);
 	}
 
 	protected getColor():number {
