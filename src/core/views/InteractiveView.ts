@@ -62,9 +62,13 @@ export default class InteractiveView extends View {
 
 	private setState(state:symbol):void {
 		this._state = state;
-		this.refreshState(this._state);
+		this.refreshState();
 	}
 
-	protected refreshState(state:symbol):void {
+	protected getState():symbol {
+		return this._state;
+	}
+
+	protected refreshState():void {
 	}
 }

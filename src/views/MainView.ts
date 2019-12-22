@@ -1,19 +1,15 @@
 import Graphics = PIXI.Graphics;
 import View from "../core/views/View";
-import Text = PIXI.Text;
+import ColoredInteractiveView from "../core/views/ColoredInteractiveView";
 
 export default class MainView extends View {
 	private _background:Graphics;
-	private _textField:Text;
+	private _button:ColoredInteractiveView;
 
 	constructor() {
 		super();
-		this.init();
-	}
-
-	protected init():void {
 		this.initBackground();
-		this.initTextField();
+		this.initButton();
 	}
 
 	private initBackground():void {
@@ -21,25 +17,25 @@ export default class MainView extends View {
 		this.addChild(this._background);
 	}
 
-	private initTextField():void {
-		this._textField = new Text("Hello!");
-		this.addChild(this._textField);
+	private initButton():void {
+		this._button = new ColoredInteractiveView();
+		this._button.setSize(100, 100);
+		this.addChild(this._button);
 	}
 
 	protected applySize():void {
 		super.applySize();
 		this.alignBackground();
-		this.alignTextField();
+		this.alignButton();
 	}
 
 	private alignBackground():void {
 		this._background.clear();
 		this._background.beginFill(0xffffff);
 		this._background.drawRect(0, 0, this.w, this.h);
-		this._background.endFill();
 	}
 
-	private alignTextField():void {
-		this.center(this._textField);
+	private alignButton():void {
+		this.center(this._button);
 	}
 }

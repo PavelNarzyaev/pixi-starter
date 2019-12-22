@@ -70,7 +70,6 @@ export default class View extends Container {
 			this._testBackground.lineStyle(1, this._testBackgroundColor);
 			this._testBackground.beginFill(this._testBackgroundColor, this._testBackgroundAlpha);
 			this._testBackground.drawRect(0, 0, this.w, this.h);
-			this._testBackground.endFill();
 		}
 
 		if (!this._onResizeInitialized) {
