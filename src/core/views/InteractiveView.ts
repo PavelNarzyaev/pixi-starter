@@ -11,6 +11,7 @@ export default class InteractiveView extends View {
 	private _currentState:symbol;
 	private _over:boolean = false;
 	private _down:boolean = false;
+	private _dirty:boolean = false;
 
 	constructor() {
 		super();
@@ -62,11 +63,21 @@ export default class InteractiveView extends View {
 
 	private setCurrentState(currentState:symbol):void {
 		this._currentState = currentState;
-		this.refreshState();
+		this.markAsDirty();
 	}
 
 	protected getCurrentState():symbol {
 		return this._currentState;
+	}
+
+	protected markAsDirty():void {
+		if (!this._dirty) {
+			this._dirty = true;
+			requestAnimationFrame(() => {
+				this.refreshState();
+				this._dirty = false;
+			});
+		}
 	}
 
 	protected refreshState():void {
