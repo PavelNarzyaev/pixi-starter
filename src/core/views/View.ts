@@ -15,40 +15,36 @@ export default class View extends Container {
 	}
 
 	public setW(value:number|string):void {
-		if (this.w !== value) {
-			this.refreshW(value);
+		const newW:number = this.calculateSize(value, () => (this.parent as View).w);
+		if (this.w !== newW) {
+			this.w = newW;
 			this.applySize();
 		}
 	}
 
 	public setH(value:number|string) {
-		if (this.h !== value) {
-			this.refreshH(value);
+		const newH:number = this.calculateSize(value, () => (this.parent as View).h);
+		if (this.h !== newH) {
+			this.h = newH;
 			this.applySize();
 		}
 	}
 
 	public setSize(w:number|string, h:number|string):void {
-		if (this.w !== w || this.h !== h) {
-			this.refreshW(w);
-			this.refreshH(h);
+		const newW:number = this.calculateSize(w, () => (this.parent as View).w);
+		const newH:number = this.calculateSize(h, () => (this.parent as View).h);
+		if (this.w !== newW || this.h !== newH) {
+			this.w = newW;
+			this.h = newH;
 			this.applySize();
 		}
 	}
 
-	private refreshW(value:number|string):void {
+	private calculateSize(value:number|string, getParentSize:() => number):number {
 		if (typeof value === 'number') {
-			this.w = Math.floor(value);
+			return Math.floor(value);
 		} else {
-			this.w = this.calculatePixels((this.parent as View).w, value);
-		}
-	}
-
-	private refreshH(value:number|string):void {
-		if (typeof value === 'number') {
-			this.h = Math.floor(value);
-		} else {
-			this.h = this.calculatePixels((this.parent as View).h, value);
+			return this.calculatePixels(getParentSize(), value);
 		}
 	}
 
@@ -85,7 +81,7 @@ export default class View extends Container {
 		if (value === undefined) {
 			return 0;
 		} else if (typeof value === 'string') {
-			return parentSize * Number(value.slice(0, -1)) / 100;
+			return Math.floor(parentSize * Number(value.slice(0, -1)) / 100);
 		} else {
 			return Math.floor(value);
 		}
