@@ -3,7 +3,6 @@ import InteractiveView from "./InteractiveView";
 import OneLineTextField from "./OneLineTextField";
 
 export default class NamedButton extends ColoredInteractiveView {
-	private static _colorByState:Map<symbol, number>;
 	private _textField:OneLineTextField;
 
 	constructor(
@@ -19,13 +18,19 @@ export default class NamedButton extends ColoredInteractiveView {
 	}
 
 	protected getColor():number {
-		if (!NamedButton._colorByState) {
-			NamedButton._colorByState = new Map<symbol, number>();
-			NamedButton._colorByState.set(InteractiveView.OVER_STATE, 0xf2f2f2);
-			NamedButton._colorByState.set(InteractiveView.DEFAULT_STATE, 0xe6e6e6);
-			NamedButton._colorByState.set(InteractiveView.PRESSED_STATE, 0xd9d9d9);
+		switch (this.getCurrentState()) {
+			case InteractiveView.OVER_STATE:
+				return 0xf2f2f2;
+
+			case InteractiveView.DEFAULT_STATE:
+				return 0xe6e6e6;
+
+			case InteractiveView.PRESSED_STATE:
+				return 0xd9d9d9;
+
+			default:
+				return 0;
 		}
-		return NamedButton._colorByState.get(this.getCurrentState());
 	}
 
 	protected applySize():void {

@@ -1,5 +1,6 @@
 import SelectableView from "./SelectableView";
 import Graphics = PIXI.Graphics;
+import InteractiveView from "./InteractiveView";
 
 export default class CheckBox extends SelectableView {
 	public static CHANGE:symbol = Symbol();
@@ -49,14 +50,17 @@ export default class CheckBox extends SelectableView {
 
 	private getBackgroundColor():number {
 		switch (this.getCurrentState()) {
-			case CheckBox.OVER_STATE:
+			case InteractiveView.OVER_STATE:
 				return this.getSelected() ? 0x00a603 : 0xf2f2f2;
 
-			case CheckBox.DEFAULT_STATE:
+			case InteractiveView.DEFAULT_STATE:
 				return this.getSelected() ? 0x008c02: 0xe6e6e6;
 
-			case CheckBox.PRESSED_STATE:
+			case InteractiveView.PRESSED_STATE:
 				return this.getSelected() ? 0x007302 : 0xd9d9d9;
+
+			default:
+				return 0;
 		}
 	}
 }
