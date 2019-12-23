@@ -9,8 +9,8 @@ export default class MainView extends View {
 	private _button:Button;
 	private _selectableButton:Button;
 
-	protected init():void {
-		super.init();
+	constructor() {
+		super();
 		this._background = this.addChild(new GraphicsView(0xffffff));
 		this._button = this.addChild(new Button("Button"));
 		this._selectableButton = this.addChild(new Button("Selectable", true));

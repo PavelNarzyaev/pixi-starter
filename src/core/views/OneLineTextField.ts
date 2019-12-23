@@ -8,24 +8,22 @@ export default class OneLineTextField extends View {
 		private _text:string,
 	) {
 		super();
+		this._field = this.addChild(new Text(this._text));
 	}
 
 	protected applySize() {
 		super.applySize();
 		const fontSize:number = Math.floor(this.h * .9);
 		if (fontSize > 0) {
-			if (!this._field) {
-				this._field = this.addChild(new Text(this._text));
-			}
+			this._field.visible = true;
 			this._field.style.fontSize = fontSize;
 			this._field.text = this._text;
 			while (this._field.width > this.w && this._field.text.length >= 4) {
 				this._field.text = this._field.text.substring(0, this._field.text.length - 4) + "...";
 			}
 			this.center(this._field);
-		} else if (this._field) {
-			this._field.parent.removeChild(this._field);
-			this._field = null;
+		} else {
+			this._field.visible = false;
 		}
 	}
 }

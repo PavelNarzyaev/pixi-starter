@@ -15,10 +15,6 @@ export default class Button extends SelectableView {
 		private _selectable:boolean = false,
 	) {
 		super();
-	}
-
-	protected init():void {
-		super.init();
 		this._texture = this.addChild(new ButtonTexture(this._selectable));
 		this._nameField = this.addChild(new OneLineTextField(this._name));
 		this.refreshState();
@@ -55,29 +51,7 @@ class ButtonTexture extends View {
 		private _selectable:boolean = false,
 	) {
 		super();
-	}
-
-	private createTexture(x:number, y:number):NineSlicePlane {
-		const textureSize:number = 26;
-		const sliceSize:number = 10;
-		const rectangle:Rectangle = new Rectangle(x * textureSize, y * textureSize, textureSize, textureSize);
-		const texture:Texture = new Texture(Texture.from("img/buttons.png").baseTexture, rectangle);
-		return new NineSlicePlane(texture, sliceSize, sliceSize, sliceSize, sliceSize);
-	}
-
-	public refreshTexture(currentState:symbol, selected:boolean = false):void {
 		this.initTextures();
-		const newTexture:NineSlicePlane = this._textures.get(this._selectable ? selected : false).get(currentState);
-		if (this._texture !== newTexture) {
-			if (this._texture) {
-				this._texture.parent.removeChild(this._texture);
-			}
-			this._texture = newTexture;
-			this.addChild(this._texture);
-			if (this.w && this.h) {
-				this.alignTexture();
-			}
-		}
 	}
 
 	private initTextures():void {
@@ -100,6 +74,28 @@ class ButtonTexture extends View {
 				textures.set(InteractiveView.PRESSED_STATE, this.createTexture(2, 0));
 			}
 			this._textures.set(false, textures);
+		}
+	}
+
+	private createTexture(x:number, y:number):NineSlicePlane {
+		const textureSize:number = 26;
+		const sliceSize:number = 10;
+		const rectangle:Rectangle = new Rectangle(x * textureSize, y * textureSize, textureSize, textureSize);
+		const texture:Texture = new Texture(Texture.from("img/buttons.png").baseTexture, rectangle);
+		return new NineSlicePlane(texture, sliceSize, sliceSize, sliceSize, sliceSize);
+	}
+
+	public refreshTexture(currentState:symbol, selected:boolean = false):void {
+		const newTexture:NineSlicePlane = this._textures.get(this._selectable ? selected : false).get(currentState);
+		if (this._texture !== newTexture) {
+			if (this._texture) {
+				this._texture.parent.removeChild(this._texture);
+			}
+			this._texture = newTexture;
+			this.addChild(this._texture);
+			if (this.w && this.h) {
+				this.alignTexture();
+			}
 		}
 	}
 

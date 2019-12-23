@@ -4,8 +4,8 @@ import GraphicsView from "./GraphicsView";
 export default class ColoredInteractiveView extends InteractiveView {
 	private _background:GraphicsView;
 
-	protected init():void {
-		super.init();
+	constructor() {
+		super();
 
 		this.buttonMode = true;
 

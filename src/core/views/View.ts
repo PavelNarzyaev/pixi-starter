@@ -5,7 +5,6 @@ import {genRandomColor} from "../../Random";
 export default class View extends Container {
 	public w:number;
 	public h:number;
-	private _initialized:boolean = false;
 	private _testBackground:Graphics;
 	private _testBackgroundColor:number;
 	private _testBackgroundAlpha:number;
@@ -63,14 +62,6 @@ export default class View extends Container {
 			this._testBackground.beginFill(this._testBackgroundColor, this._testBackgroundAlpha);
 			this._testBackground.drawRect(0, 0, this.w, this.h);
 		}
-
-		if (!this._initialized) {
-			this.init();
-		}
-	}
-
-	protected init():void {
-		this._initialized = true;
 	}
 
 	private calculatePixels(parentSize:number, value:number|string):number {

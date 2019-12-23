@@ -17,10 +17,6 @@ export default class GraphicsView extends View {
 		this._lineWidth = lineWidth !== undefined ? lineWidth : 0;
 		this._lineColor = lineColor !== undefined ? lineColor : 0;
 		this._roundCorners = roundCorners !== undefined ? roundCorners : 0;
-	}
-
-	protected init():void {
-		super.init();
 		this._background = this.addChild(new Graphics());
 	}
 
