@@ -1,4 +1,3 @@
-import SelectableView from "../core/views/SelectableView";
 import NineSlicePlane = PIXI.NineSlicePlane;
 import InteractiveView from "../core/views/InteractiveView";
 import View from "../core/views/View";
@@ -6,15 +5,15 @@ import Rectangle = PIXI.Rectangle;
 import Texture = PIXI.Texture;
 import OneLineTextField from "../core/views/OneLineTextField";
 
-export default class Button extends SelectableView {
+export default class Button extends InteractiveView {
 	private _texture:ButtonTexture;
 	private _nameField:OneLineTextField;
 
 	constructor(
 		private _name:string,
-		private _selectable:boolean = false,
+		selectable:boolean = false,
 	) {
-		super();
+		super(selectable);
 		this._texture = this.addChild(new ButtonTexture(this._selectable));
 		this._nameField = this.addChild(new OneLineTextField(this._name));
 		this.refreshState();

@@ -3,17 +3,18 @@ import View from "./View";
 
 export default class InteractiveView extends View {
 	public static readonly CLICK:symbol = Symbol();
-	public static readonly PRESS:symbol = Symbol();
-	public static readonly RELEASE:symbol = Symbol();
+	public static readonly CHANGE_SELECT:symbol = Symbol();
 	public static readonly DEFAULT_STATE:symbol = Symbol();
 	public static readonly OVER_STATE:symbol = Symbol();
 	public static readonly PRESSED_STATE:symbol = Symbol();
 	private _currentState:symbol;
+	private _selected:boolean = false;
 	private _over:boolean = false;
 	private _down:boolean = false;
-	private _dirty:boolean = false;
 
-	constructor() {
+	constructor(
+		protected _selectable:boolean = false,
+	) {
 		super();
 		this.interactive = true;
 		this._currentState = InteractiveView.DEFAULT_STATE;
@@ -41,43 +42,44 @@ export default class InteractiveView extends View {
 	private pointerDownHandler():void {
 		this._down = true;
 		this.setCurrentState(InteractiveView.PRESSED_STATE);
-		this.emit(InteractiveView.PRESS);
 	}
 
 	private pointerUpHandler():void {
 		this._down = false;
+		if (this._selectable) {
+			this.setSelected(!this.getSelected());
+		}
 		if (this._over) {
 			this.setCurrentState(InteractiveView.OVER_STATE);
 		} else {
 			this.setCurrentState(InteractiveView.DEFAULT_STATE);
 		}
-		this.emit(InteractiveView.RELEASE);
 		this.emit(InteractiveView.CLICK);
 	}
 
 	private pointerUpOutsideHandler():void {
 		this._down = false;
 		this.setCurrentState(InteractiveView.DEFAULT_STATE);
-		this.emit(InteractiveView.RELEASE);
 	}
 
 	private setCurrentState(currentState:symbol):void {
 		this._currentState = currentState;
-		this.markAsDirty();
+		this.refreshState();
 	}
 
 	protected getCurrentState():symbol {
 		return this._currentState;
 	}
 
-	protected markAsDirty():void {
-		if (!this._dirty) {
-			this._dirty = true;
-			requestAnimationFrame(() => {
-				this.refreshState();
-				this._dirty = false;
-			});
+	public setSelected(value:boolean):void {
+		if (value !== this._selected) {
+			this._selected = value;
+			this.emit(InteractiveView.CHANGE_SELECT);
 		}
+	}
+
+	public getSelected():boolean {
+		return this._selected;
 	}
 
 	protected refreshState():void {

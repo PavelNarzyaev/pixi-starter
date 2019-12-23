@@ -10,9 +10,9 @@ export default class ColoredInteractiveView extends InteractiveView {
 		this.buttonMode = true;
 
 		this._background = this.addChild(new GraphicsView());
-		this._background.setLineColor(0xbfbfbf);
-		this._background.setLineWidth(2);
-		this._background.setRoundCorners(20);
+		this._background.lineColor = 0xbfbfbf;
+		this._background.lineWidth = 2;
+		this._background.roundCorners = 20;
 	}
 
 	protected refreshState():void {
@@ -26,8 +26,10 @@ export default class ColoredInteractiveView extends InteractiveView {
 	}
 
 	private redrawBackground():void {
-		this._background.setFillColor(this.getColor());
-		this._background.setSize(this.w, this.h);
+		this._background.fillColor = this.getColor();
+		this._background.w = this.w;
+		this._background.h = this.h;
+		this._background.redraw();
 	}
 
 	protected getColor():number {
