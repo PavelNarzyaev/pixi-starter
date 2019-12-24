@@ -1,25 +1,40 @@
 import View from "../core/views/View";
 import Button from "./Button";
 import InteractiveView from "../core/views/InteractiveView";
-import SliderV from "./SliderV";
-import SliderH from "./SliderH";
 import TilingSprite = PIXI.TilingSprite;
 import Texture = PIXI.Texture;
+import Scroll from "./scroll/Scroll";
+import Graphics = PIXI.Graphics;
+import {genRandomColor, genRandomInteger} from "../Random";
 
 export default class MainView extends View {
+	private _scroll:Scroll;
 	private _background:TilingSprite;
 	private _button:Button;
 	private _selectableButton:Button;
-	private _sliderVertical:SliderV;
-	private _sliderHorizontal:SliderH;
 
 	constructor() {
 		super();
+
 		this._background = this.addChild(new TilingSprite(Texture.from("img/background.png"), 100, 100));
 		this._button = this.addChild(new Button("Button"));
 		this._selectableButton = this.addChild(new Button("Selectable", true));
-		this._sliderVertical = this.addChild(new SliderV());
-		this._sliderHorizontal = this.addChild(new SliderH());
+		this._scroll = this.addChild(new Scroll(true));
+
+		// FIXME: <temporary_code>
+		const contentWidth:number = 1500;
+		const contentHeight:number = 1500;
+		for (let i:number = 0; i < 100; i++) {
+			const circle:Graphics = new Graphics();
+			circle.beginFill(genRandomColor());
+			const radius:number = genRandomInteger(20, 50);
+			circle.drawCircle(0, 0, radius);
+			circle.x = genRandomInteger(radius, contentWidth - radius);
+			circle.y = genRandomInteger(radius, contentHeight - radius);
+			this._scroll.addContent(circle);
+		}
+		this._scroll.setContainerSize(contentWidth, contentHeight);
+		// FIXME: </temporary_code>
 
 		this._button.addListener(InteractiveView.CLICK, () => { console.log("click"); });
 		this._selectableButton.addListener(
@@ -33,51 +48,18 @@ export default class MainView extends View {
 	protected applySize():void {
 		super.applySize();
 
+		this._scroll.setSize(this.w, this.h);
 		this._background.width = this.w;
 		this._background.height = this.h;
 		this._button.setSize(150, 50);
 		this._selectableButton.setSize(200, 50);
 
-		const horizontalOffset:number = 400;
-		const maxButtonWidth:number = Math.max(this._button.w, this._selectableButton.w);
-		const totalWidth:number = maxButtonWidth + horizontalOffset * 2;
-		if (totalWidth < this.w) {
-			this.centerHorizontal(this._button);
-			this.centerHorizontal(this._selectableButton);
-		} else {
-			this._button.x = Math.floor((totalWidth - this._button.w) / 2);
-			this._selectableButton.x = Math.floor((totalWidth - this._selectableButton.w) / 2);
-		}
+		this.centerHorizontal(this._button);
+		this.centerHorizontal(this._selectableButton);
 
-		const verticalOffset:number = 200;
 		const gap:number = 10;
 		const buttonsHeight:number = this._button.h + gap + this._selectableButton.h;
-		const totalHeight:number = buttonsHeight + verticalOffset * 2;
-		if (totalHeight < this.h) {
-			this._button.y = Math.floor((this.h - buttonsHeight) / 2);
-		} else {
-			this._button.y = verticalOffset;
-		}
+		this._button.y = Math.floor((this.h - buttonsHeight) / 2);
 		this._selectableButton.y = this._button.y + this._button.h + gap;
-
-		const sliderThickness:number = 20;
-		this._sliderVertical.setContentSize(totalHeight);
-		this.align(
-			this._sliderVertical,
-			{
-				right: 0,
-				w: sliderThickness,
-				h: this.h,
-			}
-		);
-		this._sliderHorizontal.setContentSize(totalWidth);
-		this.align(
-			this._sliderHorizontal,
-			{
-				bottom: 0,
-				w: this.w,
-				h: sliderThickness,
-			}
-		);
 	}
 }

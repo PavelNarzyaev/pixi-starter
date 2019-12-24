@@ -1,16 +1,16 @@
-import View from "../View";
-import {POINTER_DOWN, POINTER_MOVE, POINTER_UP, POINTER_UP_OUTSIDE} from "../../../PointerEvents";
+import View from "../../View";
+import {POINTER_DOWN, POINTER_MOVE, POINTER_UP, POINTER_UP_OUTSIDE} from "../../../../PointerEvents";
 import InteractionEvent = PIXI.interaction.InteractionEvent;
 import IPoint = PIXI.IPoint;
-import InteractiveView from "../InteractiveView";
+import InteractiveView from "../../InteractiveView";
 
 export default class SliderAbstract extends View {
 	public static readonly CHANGE_PERCENT:symbol = Symbol();
 	protected _thumb:InteractiveView;
+	private _thumbSizePercent:number;
 	private _background:View;
 	private _pointerDownPosition:number;
 	private _percent:number = 0;
-	private _contentSize:number = 0;
 
 	constructor() {
 		super();
@@ -32,7 +32,7 @@ export default class SliderAbstract extends View {
 
 	private pointerMoveHandler(event:InteractionEvent):void {
 		const targetPosition:number = this.getPointPosition(this.toLocal(event.data.global)) - this._pointerDownPosition;
-		const maxPosition:number = this.getMaxThumbPosition();
+		const maxPosition:number = this.calculateMaxThumbPosition();
 		const correctedPosition:number = Math.round(Math.max(0, Math.min(maxPosition, targetPosition)));
 		if (this.getThumbPosition() !== correctedPosition) {
 			this._percent = correctedPosition / maxPosition;
@@ -42,12 +42,11 @@ export default class SliderAbstract extends View {
 	}
 
 	private refreshThumbPosition():void {
-		this.setThumbPosition(Math.round(this.getMaxThumbPosition() * this._percent));
+		this.setThumbPosition(Math.round(this.calculateMaxThumbPosition() * this._percent));
 	}
 
 	protected applySize():void {
 		super.applySize();
-		this.refreshVisibility();
 		if (this.visible) {
 			this.alignThumb();
 			this.refreshThumbPosition();
@@ -55,36 +54,30 @@ export default class SliderAbstract extends View {
 		}
 	}
 
-	private refreshVisibility():void {
-		const calculatedVisibility = this._contentSize > this.getSliderSize(); // TODO: add/remove listeners
-		if (calculatedVisibility !== this.visible) {
-			this.visible = calculatedVisibility;
-			if (this.visible) {
-				this.setPercent(0, false);
-			}
-		}
-	}
-
-	protected calculateThumbSize():number {
-		const minThumbSize:number = 30;
-		return Math.max(minThumbSize, this.getSliderSize() * (this.getSliderSize() / this._contentSize));
-	}
-
 	public setPercent(value:number, applyImmediately:boolean = true) {
 		if (this._percent !== value) {
-			this._percent = value;
+			this._percent = Math.min(1, Math.max(0, value));
 			if (applyImmediately) {
 				this.refreshThumbPosition();
 			}
 		}
 	}
 
-	public setContentSize(value:number, applyImmediately:boolean = false):void {
-		this._contentSize = value;
+	public getPercent():number {
+		return this._percent;
+	}
+
+	public setThumbPercentSize(value:number, applyImmediately:boolean = false):void {
+		this._thumbSizePercent = value;
 		if (applyImmediately) {
 			this.alignThumb();
 			this.refreshThumbPosition();
 		}
+	}
+
+	protected calculateThumbSize():number {
+		const minSize:number = Math.min(30, this.getSliderSize() * 0.5);
+		return Math.max(minSize, this._thumbSizePercent * this.getSliderSize());
 	}
 
 	//////////////////////////////////
@@ -95,7 +88,7 @@ export default class SliderAbstract extends View {
 		return null;
 	}
 
-	protected getMaxThumbPosition():number {
+	protected calculateMaxThumbPosition():number {
 		return null;
 	}
 

@@ -1,5 +1,5 @@
-import InteractiveView from "../core/views/InteractiveView";
-import GraphicsView from "../core/views/GraphicsView";
+import InteractiveView from "../../core/views/InteractiveView";
+import GraphicsView from "../../core/views/GraphicsView";
 
 export default class Thumb extends InteractiveView {
 	private _skin:GraphicsView;

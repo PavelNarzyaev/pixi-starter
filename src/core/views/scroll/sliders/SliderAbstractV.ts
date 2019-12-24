@@ -6,7 +6,7 @@ export default class SliderAbstractV extends SliderAbstract {
 		return point.y;
 	}
 
-	protected getMaxThumbPosition():number {
+	protected calculateMaxThumbPosition():number {
 		return this.h - this._thumb.h;
 	}
 
@@ -22,7 +22,7 @@ export default class SliderAbstractV extends SliderAbstract {
 		return this.h;
 	}
 
-	protected alignThumb():void {
+	public alignThumb():void {
 		this._thumb.setSize(this.w, this.calculateThumbSize());
 	}
 }
