@@ -2,20 +2,23 @@ import View from "../core/views/View";
 import GraphicsView from "../core/views/GraphicsView";
 import Button from "./Button";
 import InteractiveView from "../core/views/InteractiveView";
-import Slider from "./Slider";
+import SliderV from "./SliderV";
+import SliderH from "./SliderH";
 
 export default class MainView extends View {
 	private _background:GraphicsView;
 	private _button:Button;
 	private _selectableButton:Button;
-	private _slider:Slider;
+	private _sliderVertical:SliderV;
+	private _sliderHorizontal:SliderH;
 
 	constructor() {
 		super();
 		this._background = this.addChild(new GraphicsView(0xffffff));
 		this._button = this.addChild(new Button("Button"));
 		this._selectableButton = this.addChild(new Button("Selectable", true));
-		this._slider = this.addChild(new Slider());
+		this._sliderVertical = this.addChild(new SliderV());
+		this._sliderHorizontal = this.addChild(new SliderH());
 
 		this._button.addListener(InteractiveView.CLICK, () => { console.log("click"); });
 		this._selectableButton.addListener(
@@ -33,6 +36,17 @@ export default class MainView extends View {
 		this._button.setSize(150, 50);
 		this._selectableButton.setSize(200, 50);
 
+		const horizontalOffset:number = 400;
+		const maxButtonWidth:number = Math.max(this._button.w, this._selectableButton.w);
+		const totalWidth:number = maxButtonWidth + horizontalOffset * 2;
+		if (totalWidth < this.w) {
+			this.centerHorizontal(this._button);
+			this.centerHorizontal(this._selectableButton);
+		} else {
+			this._button.x = Math.floor((totalWidth - this._button.w) / 2);
+			this._selectableButton.x = Math.floor((totalWidth - this._selectableButton.w) / 2);
+		}
+
 		const verticalOffset:number = 200;
 		const gap:number = 10;
 		const buttonsHeight:number = this._button.h + gap + this._selectableButton.h;
@@ -43,16 +57,24 @@ export default class MainView extends View {
 			this._button.y = verticalOffset;
 		}
 		this._selectableButton.y = this._button.y + this._button.h + gap;
-		this.centerHorizontal(this._button);
-		this.centerHorizontal(this._selectableButton);
 
-		this._slider.setContentHeight(totalHeight);
+		const sliderThickness:number = 20;
+		this._sliderVertical.setContentSize(totalHeight);
 		this.align(
-			this._slider,
+			this._sliderVertical,
 			{
 				right: 0,
-				w: 20,
+				w: sliderThickness,
 				h: this.h,
+			}
+		);
+		this._sliderHorizontal.setContentSize(totalWidth);
+		this.align(
+			this._sliderHorizontal,
+			{
+				bottom: 0,
+				w: this.w,
+				h: sliderThickness,
 			}
 		);
 	}
