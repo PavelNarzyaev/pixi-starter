@@ -1,12 +1,13 @@
 import View from "../core/views/View";
-import GraphicsView from "../core/views/GraphicsView";
 import Button from "./Button";
 import InteractiveView from "../core/views/InteractiveView";
 import SliderV from "./SliderV";
 import SliderH from "./SliderH";
+import TilingSprite = PIXI.TilingSprite;
+import Texture = PIXI.Texture;
 
 export default class MainView extends View {
-	private _background:GraphicsView;
+	private _background:TilingSprite;
 	private _button:Button;
 	private _selectableButton:Button;
 	private _sliderVertical:SliderV;
@@ -14,7 +15,7 @@ export default class MainView extends View {
 
 	constructor() {
 		super();
-		this._background = this.addChild(new GraphicsView(0xffffff));
+		this._background = this.addChild(new TilingSprite(Texture.from("img/background.png"), 100, 100));
 		this._button = this.addChild(new Button("Button"));
 		this._selectableButton = this.addChild(new Button("Selectable", true));
 		this._sliderVertical = this.addChild(new SliderV());
@@ -32,7 +33,8 @@ export default class MainView extends View {
 	protected applySize():void {
 		super.applySize();
 
-		this._background.setSize(this.w, this.h);
+		this._background.width = this.w;
+		this._background.height = this.h;
 		this._button.setSize(150, 50);
 		this._selectableButton.setSize(200, 50);
 
