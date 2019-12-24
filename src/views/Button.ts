@@ -4,6 +4,7 @@ import View from "../core/views/View";
 import Rectangle = PIXI.Rectangle;
 import Texture = PIXI.Texture;
 import OneLineTextField from "../core/views/OneLineTextField";
+import TextStyle = PIXI.TextStyle;
 
 export default class Button extends InteractiveView {
 	private _texture:ButtonTexture;
@@ -15,7 +16,19 @@ export default class Button extends InteractiveView {
 	) {
 		super(selectable);
 		this._texture = this.addChild(new ButtonTexture(this._selectable));
-		this._nameField = this.addChild(new OneLineTextField(this._name));
+		this._nameField = this.addChild(
+			new OneLineTextField(
+				this._name,
+				new TextStyle({
+					fill:0x16533a,
+					dropShadow:true,
+					dropShadowColor:0xffffff,
+					dropShadowAngle:Math.PI / 2,
+					dropShadowAlpha:.2,
+					dropShadowDistance: 1
+				})
+			)
+		);
 		this.refreshState();
 	}
 

@@ -1,14 +1,16 @@
 import Text = PIXI.Text;
 import View from "./View";
+import TextStyle = PIXI.TextStyle;
 
 export default class OneLineTextField extends View {
 	private _field:Text;
 
 	constructor(
 		private _text:string,
+		private _style?:TextStyle,
 	) {
 		super();
-		this._field = this.addChild(new Text(this._text));
+		this._field = this.addChild(new Text(this._text, this._style));
 	}
 
 	protected applySize() {
