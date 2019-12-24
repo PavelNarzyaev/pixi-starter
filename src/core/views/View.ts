@@ -58,7 +58,7 @@ export default class View extends Container {
 	protected applySize():void {
 		if (this._testBackground) {
 			this._testBackground.clear();
-			this._testBackground.lineStyle(2, this._testBackgroundColor);
+			this._testBackground.lineStyle(2, this._testBackgroundColor, 1, 0);
 			this._testBackground.beginFill(this._testBackgroundColor, this._testBackgroundAlpha);
 			this._testBackground.drawRect(0, 0, this.w, this.h);
 		}

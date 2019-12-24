@@ -23,7 +23,7 @@ export default class GraphicsView extends View {
 		super.applySize();
 		this._background.clear();
 		if (this.lineWidth) {
-			this._background.lineStyle(this.lineWidth, this.lineColor);
+			this._background.lineStyle(this.lineWidth, this.lineColor, 1, 0);
 		}
 		this._background.beginFill(this.fillColor);
 		if (this.roundCorners) {

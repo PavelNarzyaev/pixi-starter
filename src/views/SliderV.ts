@@ -1,17 +1,15 @@
 import View from "../core/views/View";
 import SliderAbstractV from "../core/views/slider/SliderAbstractV";
 import InteractiveView from "../core/views/InteractiveView";
+import Thumb from "./Thumb";
+import GraphicsView from "../core/views/GraphicsView";
 
 export default class SliderV extends SliderAbstractV {
 	protected backgroundFactory():View {
-		const background:View = new View();
-		background.showTestBackground();
-		return background;
+		return new GraphicsView(0x282828);
 	}
 
 	protected thumbFactory():InteractiveView {
-		const thumb:InteractiveView = new InteractiveView();
-		thumb.showTestBackground();
-		return thumb;
+		return new Thumb();
 	}
 }
