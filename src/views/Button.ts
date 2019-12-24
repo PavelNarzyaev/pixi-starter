@@ -17,11 +17,6 @@ export default class Button extends InteractiveView {
 		this._texture = this.addChild(new ButtonTexture(this._selectable));
 		this._nameField = this.addChild(new OneLineTextField(this._name));
 		this.refreshState();
-		if (this._selectable) {
-			this.addListener(InteractiveView.CLICK, () => {
-				this.setSelected(!this.getSelected())
-			}, this);
-		}
 	}
 
 	protected refreshState():void {
