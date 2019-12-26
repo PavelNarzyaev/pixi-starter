@@ -1,19 +1,14 @@
 import View from "../core/views/View";
 import OneLineTextField from "../core/views/OneLineTextField";
 import TextStyle = PIXI.TextStyle;
-import GraphicsView from "../core/views/GraphicsView";
 
 export default class Info extends View {
-	private _background:GraphicsView;
 	private _clicksNameField:NameAndValueFields;
 	private _selectedNameField:NameAndValueFields;
 	private _elements:View[] = [];
 
 	constructor() {
 		super();
-		this._background = this.addChild(new GraphicsView());
-		this._background.fillColor = 0x37966f;
-		this._background.roundCorners = 10;
 		this._clicksNameField = this.initElement(new NameAndValueFields("Clicks:"));
 		this._selectedNameField = this.initElement(new NameAndValueFields("Selected:"));
 	}
@@ -33,7 +28,6 @@ export default class Info extends View {
 
 	protected applySize():void {
 		super.applySize();
-		this._background.setSize(this.w, this.h);
 		const elementHeight:number = 40;
 		const elementsHeight:number = this._elements.length * elementHeight;
 		let nextY:number = Math.floor((this.h - elementsHeight) / 2);
@@ -55,7 +49,7 @@ class NameAndValueFields extends View {
 		super();
 		if (!NameAndValueFields._style) {
 			NameAndValueFields._style = new TextStyle({
-				fill: 0x16533a,
+				fill: 0x222222,
 				dropShadow: true,
 				dropShadowColor: 0xffffff,
 				dropShadowAngle: Math.PI / 2,

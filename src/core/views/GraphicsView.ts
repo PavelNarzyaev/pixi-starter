@@ -11,7 +11,7 @@ export default class GraphicsView extends View {
 
 	constructor(fillColor?:number, fillAlpha?:number, lineWidth?:number, lineColor?:number, roundCorners?:number) {
 		super();
-		this.fillColor = fillColor !== undefined ? fillColor : 0;
+		this.fillColor = fillColor !== undefined ? fillColor : null;
 		this.fillAlpha = fillAlpha !== undefined ? fillAlpha : 1;
 		this.lineWidth = lineWidth !== undefined ? lineWidth : 0;
 		this.lineColor = lineColor !== undefined ? lineColor : 0;
@@ -25,7 +25,9 @@ export default class GraphicsView extends View {
 		if (this.lineWidth) {
 			this._background.lineStyle(this.lineWidth, this.lineColor, 1, 0);
 		}
-		this._background.beginFill(this.fillColor);
+		if (this.fillColor !== null) {
+			this._background.beginFill(this.fillColor);
+		}
 		if (this.roundCorners) {
 			this._background.drawRoundedRect(0, 0, this.w, this.h, this.roundCorners);
 		} else {
