@@ -20,12 +20,12 @@ export default class Button extends InteractiveView {
 			new OneLineTextField(
 				this._name,
 				new TextStyle({
-					fill:0x16533a,
-					dropShadow:true,
-					dropShadowColor:0xffffff,
-					dropShadowAngle:Math.PI / 2,
-					dropShadowAlpha:.2,
-					dropShadowDistance: 1
+					fill: 0x16533a,
+					dropShadow: true,
+					dropShadowColor: 0xffffff,
+					dropShadowAngle: Math.PI / 2,
+					dropShadowAlpha: .2,
+					dropShadowDistance: 1,
 				})
 			)
 		);
