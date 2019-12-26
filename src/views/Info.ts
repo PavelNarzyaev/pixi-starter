@@ -59,7 +59,9 @@ class NameAndValueFields extends View {
 		}
 
 		this._nameField = this.addChild(new OneLineTextField(name, NameAndValueFields._style));
+		this._nameField.setAlign(OneLineTextField.ALIGN_RIGHT);
 		this._valueField = this.addChild(new OneLineTextField());
+		this._valueField.setAlign(OneLineTextField.ALIGN_LEFT);
 		this._valueField.setStyle(NameAndValueFields._style);
 	}
 
@@ -69,8 +71,9 @@ class NameAndValueFields extends View {
 
 	protected applySize():void {
 		super.applySize();
-		this._nameField.setSize(this.w / 2, this.h);
-		this._valueField.setSize(this.w - this._nameField.w, this.h);
-		this._valueField.x = this._nameField.w;
+		const gap:number = 10;
+		this._nameField.setSize(this.w * .5, this.h);
+		this._valueField.setSize(this.w - this._nameField.w - gap, this.h);
+		this._valueField.x = this._nameField.w + gap;
 	}
 }

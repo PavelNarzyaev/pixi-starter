@@ -3,9 +3,14 @@ import View from "./View";
 import TextStyle = PIXI.TextStyle;
 
 export default class OneLineTextField extends View {
+	public static readonly ALIGN_LEFT:symbol = Symbol();
+	public static readonly ALIGN_RIGHT:symbol = Symbol();
+	public static readonly ALIGN_CENTER:symbol = Symbol();
+
 	private _field:Text;
 	private _text:string = "";
 	private _style:TextStyle;
+	private _align:symbol = OneLineTextField.ALIGN_CENTER;
 
 	constructor(text?:string, style?:TextStyle) {
 		super();
@@ -17,6 +22,13 @@ export default class OneLineTextField extends View {
 		}
 		if (text) {
 			this.refresh();
+		}
+	}
+
+	public setAlign(align:symbol):void {
+		this._align = align;
+		if (this.w && this.h) {
+			this.alignField();
 		}
 	}
 
@@ -63,7 +75,19 @@ export default class OneLineTextField extends View {
 				while (this._field.width > this.w && this._field.text.length >= 4) {
 					this._field.text = this._field.text.substring(0, this._field.text.length - 4) + "...";
 				}
-				this.center(this._field);
+				switch (this._align) {
+					case OneLineTextField.ALIGN_CENTER:
+						this.center(this._field);
+						break;
+
+					case OneLineTextField.ALIGN_LEFT:
+						this._field.x = 0;
+						break;
+
+					case OneLineTextField.ALIGN_RIGHT:
+						this._field.x = this.w - this._field.width;
+						break;
+				}
 			} else {
 				this._field.visible = false;
 			}
