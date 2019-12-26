@@ -62,8 +62,8 @@ export default class ScrollAbstract extends View {
 		}
 	}
 
-	public addContent(content:DisplayObject):void {
-		this._contentContainer.addChild(content);
+	public addContent<T extends DisplayObject>(content:T):T {
+		return this._contentContainer.addChild(content);
 	}
 
 	public removeContent(content:DisplayObject):void {
