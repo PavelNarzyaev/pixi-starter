@@ -40,11 +40,19 @@ export default class InteractiveView extends View {
 	}
 
 	private pointerDownHandler():void {
+		this.press();
+	}
+
+	public press():void {
 		this._down = true;
 		this.setCurrentState(InteractiveView.PRESSED_STATE);
 	}
 
 	private pointerUpHandler():void {
+		this.release();
+	}
+
+	public release():void {
 		this._down = false;
 		if (this._selectable) {
 			this.setSelected(!this.getSelected());

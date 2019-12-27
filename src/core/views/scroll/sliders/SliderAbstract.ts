@@ -9,7 +9,7 @@ export default class SliderAbstract extends View {
 	protected _thumb:InteractiveView;
 	private _thumbSizePercent:number;
 	private _background:View;
-	private _pointerDownPosition:number;
+	private _thumbPointerDownPosition:number;
 	private _percent:number = 0;
 	private _thumbPositionInvalidated:boolean = false;
 	private _thumbSizeInvalidated:boolean = false;
@@ -17,25 +17,48 @@ export default class SliderAbstract extends View {
 	constructor() {
 		super();
 		this._background = this.addChild(this.backgroundFactory());
+		this._background.interactive = true;
+		this._background.on(POINTER_DOWN, this.backgroundPointerDownHandler, this);
 		this._thumb = this.addChild(this.thumbFactory());
 		this._thumb.on(POINTER_DOWN, this.thumbPointerDownHandler, this);
-		this._thumb.on(POINTER_UP, this.thumbPointerUpHandler, this);
-		this._thumb.on(POINTER_UP_OUTSIDE, this.thumbPointerUpHandler, this);
+		this.interactive = true;
+		this.on(POINTER_UP, this.pointerUpHandler, this);
+		this.on(POINTER_UP_OUTSIDE, this.pointerUpHandler, this);
+	}
+
+	private backgroundPointerDownHandler(event:InteractionEvent):void {
+		const pointerDownPosition:number = this.getPointPosition(this.toLocal(event.data.global));
+		this.moveThumbToPosition(pointerDownPosition - this.getThumbSize() / 2);
+		this.pressThumb(event);
 	}
 
 	private thumbPointerDownHandler(event:InteractionEvent):void {
-		this._pointerDownPosition = this.getPointPosition(this._thumb.toLocal(event.data.global));
+		this.pressThumb(event);
+	}
+
+	private pressThumb(event:InteractionEvent):void {
+		this._thumbPointerDownPosition = this.getPointPosition(this._thumb.toLocal(event.data.global));
+		this._thumb.press();
 		this._thumb.on(POINTER_MOVE, this.pointerMoveHandler, this);
 	}
 
-	private thumbPointerUpHandler():void {
+	private pointerUpHandler():void {
+		this.releaseThumb();
+	}
+
+	private releaseThumb():void {
+		this._thumb.release();
 		this._thumb.off(POINTER_MOVE, this.pointerMoveHandler, this);
 	}
 
 	private pointerMoveHandler(event:InteractionEvent):void {
-		const targetPosition:number = this.getPointPosition(this.toLocal(event.data.global)) - this._pointerDownPosition;
+		const eventPosition:number = this.getPointPosition(this.toLocal(event.data.global));
+		this.moveThumbToPosition(eventPosition - this._thumbPointerDownPosition);
+	}
+
+	private moveThumbToPosition(targetPosition:number):void {
 		const maxPosition:number = this.calculateMaxThumbPosition();
-		const correctedPosition:number = Math.round(Math.max(0, Math.min(maxPosition, targetPosition)));
+		const correctedPosition:number = Math.floor(Math.max(0, Math.min(maxPosition, targetPosition)));
 		if (this.getThumbPosition() !== correctedPosition) {
 			this._percent = correctedPosition / maxPosition;
 			this._thumbPositionInvalidated = true;
@@ -68,7 +91,7 @@ export default class SliderAbstract extends View {
 
 	private validateThumbPosition():void {
 		if (this._thumbPositionInvalidated) {
-			this.setThumbPosition(Math.round(this.calculateMaxThumbPosition() * this._percent));
+			this.setThumbPosition(Math.floor(this.calculateMaxThumbPosition() * this._percent));
 			this._thumbPositionInvalidated = false;
 		}
 	}
@@ -116,6 +139,10 @@ export default class SliderAbstract extends View {
 
 	protected getSliderSize():number {
 		return null;
+	}
+
+	protected getThumbSize():number {
+		return  null;
 	}
 
 	protected refreshThumbSize():void {

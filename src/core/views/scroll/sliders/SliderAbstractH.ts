@@ -22,6 +22,10 @@ export default class SliderAbstractH extends SliderAbstract {
 		return this.w;
 	}
 
+	protected getThumbSize():number {
+		return this._thumb.w;
+	}
+
 	protected refreshThumbSize():void {
 		this._thumb.setSize(this.calculateThumbSize(), this.h);
 	}
