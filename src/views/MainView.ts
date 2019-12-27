@@ -20,12 +20,14 @@ export default class MainView extends View {
 
 		// FIXME: <temporary_code>
 		this._mainContent.setSize(1000, 1000);
+		/*
 		this._mainContent.showTestBackground();
 		this._background.interactive = true;
 		this._background.on(POINTER_DOWN, () => {
 			this._mainContent.setSize(genRandomInteger(500, 1500), genRandomInteger(500, 1500), true);
 			console.log(this._mainContent.getStringSize());
 		}, this);
+		 */
 		// FIXME: </temporary_code>
 	}
 

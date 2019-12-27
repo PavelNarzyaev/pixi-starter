@@ -3,8 +3,13 @@ import SliderAbstractH from "./sliders/SliderAbstractH";
 import SliderAbstractV from "./sliders/SliderAbstractV";
 import SliderAbstract from "./sliders/SliderAbstract";
 import GraphicsView from "../GraphicsView";
+import IPoint = PIXI.IPoint;
+import {POINTER_DOWN, POINTER_MOVE, POINTER_UP, POINTER_UP_OUTSIDE} from "../../../PointerEvents";
+import InteractionEvent = PIXI.interaction.InteractionEvent;
 
 export default class ScrollAbstract extends View {
+	private _invisibleBackground:GraphicsView;
+	private _invisibleBackgroundPointerDown:IPoint;
 	private _horizontalSlider:SliderAbstractH;
 	private _verticalSlider:SliderAbstractV;
 	private _corner:GraphicsView;
@@ -16,6 +21,12 @@ export default class ScrollAbstract extends View {
 		private _enabledVertical:boolean = true,
 	) {
 		super();
+		this._invisibleBackground = this.addChild(new GraphicsView(0xffffff));
+		this._invisibleBackground.interactive = true;
+		this._invisibleBackground.alpha = 0;
+		this._invisibleBackground.on(POINTER_DOWN, this.invisibleBackgroundPointerDownHandler, this);
+		this._invisibleBackground.on(POINTER_UP, this.invisibleBackgroundPointerUpHandler, this);
+		this._invisibleBackground.on(POINTER_UP_OUTSIDE, this.invisibleBackgroundPointerUpHandler, this);
 		this._contentContainer = this.addChild(new View());
 		if (this._enabledHorizontal) {
 			this._horizontalSlider = this.addChild(this.horizontalSliderFactory());
@@ -49,6 +60,7 @@ export default class ScrollAbstract extends View {
 		}
 		if (this._enabledVertical && this._enabledHorizontal) {
 			this._corner = this.addChild(new GraphicsView(0x000000));
+			this._corner.interactive = true;
 		}
 	}
 
@@ -66,6 +78,50 @@ export default class ScrollAbstract extends View {
 		}
 	}
 
+	private invisibleBackgroundPointerDownHandler(event:InteractionEvent):void {
+		this._invisibleBackgroundPointerDown = this._contentContainer.toLocal(event.data.global);
+		this._invisibleBackground.on(POINTER_MOVE, this.invisibleBackgroundMoveHandler, this);
+	}
+
+	private invisibleBackgroundPointerUpHandler():void {
+		this._invisibleBackgroundPointerDown = null;
+		this._invisibleBackground.off(POINTER_MOVE, this.invisibleBackgroundMoveHandler, this);
+	}
+
+	private invisibleBackgroundMoveHandler(event:InteractionEvent):void {
+		const eventPoint:IPoint = this.toLocal(event.data.global);
+		this.moveContainer(
+			this._horizontalSlider,
+			this.w,
+			this._contentContainer.w,
+			eventPoint.x - this._invisibleBackgroundPointerDown.x,
+			position => this._contentContainer.x = position,
+		);
+		this.moveContainer(
+			this._verticalSlider,
+			this.h,
+			this._contentContainer.h,
+			eventPoint.y - this._invisibleBackgroundPointerDown.y,
+			position => this._contentContainer.y = position,
+		);
+	}
+
+	private moveContainer(
+		slider:SliderAbstract,
+		currentSize:number,
+		containerSize:number,
+		targetContainerPosition:number,
+		setContainerPosition:(position:number) => void
+	):void {
+		if (this.sliderIsVisible(slider)) {
+			const minContainerPosition:number = currentSize - containerSize;
+			const containerPosition:number = Math.max(minContainerPosition, Math.min(0, targetContainerPosition));
+			setContainerPosition(containerPosition);
+			slider.setPercent(containerPosition / minContainerPosition);
+			slider.validate();
+		}
+	}
+
 	private refreshContentPosition(
 		currentSize:number,
 		contentSize:number,
@@ -79,6 +135,7 @@ export default class ScrollAbstract extends View {
 	protected applySize():void {
 		super.applySize();
 		this.refresh();
+		this._invisibleBackground.setSize(this._contentContainer.w, this._contentContainer.h);
 	}
 
 	private refresh():void {
@@ -137,8 +194,7 @@ export default class ScrollAbstract extends View {
 	):void {
 		if (this.sliderIsVisible(slider)) {
 			const minContainerPosition:number = currentSize - containerSize;
-			const calculatedPercent:number = minContainerPosition !== 0 ? containerPosition / minContainerPosition : 0;
-			slider.setPercent(calculatedPercent);
+			slider.setPercent(containerPosition / minContainerPosition);
 			slider.setThumbPercentSize(currentSize / containerSize);
 			this.align(slider, sliderAlignment);
 			slider.validate();
