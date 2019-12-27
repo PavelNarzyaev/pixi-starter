@@ -3,35 +3,24 @@ import Graphics = PIXI.Graphics;
 import {genRandomColor} from "../../Random";
 
 export default class View extends Container {
+	public static readonly RESIZE:symbol = Symbol();
+
 	public w:number;
 	public h:number;
 	private _testBackground:Graphics;
 	private _testBackgroundColor:number;
 	private _testBackgroundAlpha:number;
 
-	public setW(value:number|string):void {
-		const newW:number = this.calculateSize(value, () => (this.parent as View).w);
-		if (this.w !== newW) {
-			this.w = newW;
-			this.applySize();
-		}
-	}
-
-	public setH(value:number|string) {
-		const newH:number = this.calculateSize(value, () => (this.parent as View).h);
-		if (this.h !== newH) {
-			this.h = newH;
-			this.applySize();
-		}
-	}
-
-	public setSize(w:number|string, h:number|string):void {
+	public setSize(w:number|string, h:number|string, emitResizeEvent:boolean = false):void {
 		const newW:number = this.calculateSize(w, () => (this.parent as View).w);
 		const newH:number = this.calculateSize(h, () => (this.parent as View).h);
 		if (this.w !== newW || this.h !== newH) {
 			this.w = newW;
 			this.h = newH;
 			this.applySize();
+			if (emitResizeEvent) {
+				this.emit(View.RESIZE);
+			}
 		}
 	}
 
@@ -142,6 +131,10 @@ export default class View extends Container {
 	public centerVertical(child:Container|View):void {
 		const childHeight:number = child instanceof View ? child.h : child.height;
 		child.y = Math.floor((this.h - childHeight) / 2);
+	}
+
+	public getStringSize():string {
+		return this.w + "x" + this.h;
 	}
 }
 
