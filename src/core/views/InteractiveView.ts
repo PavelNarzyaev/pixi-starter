@@ -53,16 +53,22 @@ export default class InteractiveView extends View {
 	}
 
 	public release():void {
-		this._down = false;
-		if (this._selectable) {
-			this.setSelected(!this.getSelected());
+		let click:boolean = false;
+		if (this._down) {
+			this._down = false;
+			if (this._selectable) {
+				this.setSelected(!this.getSelected());
+			}
+			click = true;
 		}
 		if (this._over) {
 			this.setCurrentState(InteractiveView.OVER_STATE);
 		} else {
 			this.setCurrentState(InteractiveView.DEFAULT_STATE);
 		}
-		this.emit(InteractiveView.CLICK);
+		if (click) {
+			this.emit(InteractiveView.CLICK);
+		}
 	}
 
 	private pointerUpOutsideHandler():void {

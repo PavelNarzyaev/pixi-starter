@@ -15,6 +15,7 @@ export default class Button extends InteractiveView {
 		selectable:boolean = false,
 	) {
 		super(selectable);
+		this.buttonMode = true;
 		this._texture = this.addChild(new ButtonTexture(this._selectable));
 		this._nameField = this.addChild(
 			new OneLineTextField(
