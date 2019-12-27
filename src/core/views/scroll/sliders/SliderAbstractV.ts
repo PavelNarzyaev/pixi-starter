@@ -22,7 +22,7 @@ export default class SliderAbstractV extends SliderAbstract {
 		return this.h;
 	}
 
-	public alignThumb():void {
+	protected refreshThumbSize():void {
 		this._thumb.setSize(this.w, this.calculateThumbSize());
 	}
 }

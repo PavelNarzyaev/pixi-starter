@@ -11,9 +11,9 @@ export default class View extends Container {
 	private _testBackgroundColor:number;
 	private _testBackgroundAlpha:number;
 
-	public setSize(w:number|string, h:number|string, emitResizeEvent:boolean = false):void {
-		const newW:number = this.calculateSize(w, () => (this.parent as View).w);
-		const newH:number = this.calculateSize(h, () => (this.parent as View).h);
+	public setSize(w:number, h:number, emitResizeEvent:boolean = false):void {
+		const newW:number = this.calculatePixels(w);
+		const newH:number = this.calculatePixels(h);
 		if (this.w !== newW || this.h !== newH) {
 			this.w = newW;
 			this.h = newH;
@@ -23,46 +23,7 @@ export default class View extends Container {
 			}
 		}
 	}
-
-	private calculateSize(value:number|string, getParentSize:() => number):number {
-		if (typeof value === 'number') {
-			return Math.floor(value);
-		} else {
-			return this.calculatePixels(getParentSize(), value);
-		}
-	}
-
-	public showTestBackground(color?:number, alpha:number = .5):void {
-		if (!this._testBackground) {
-			this._testBackground = new Graphics();
-			this.addChildAt(this._testBackground, 0);
-		}
-		this._testBackgroundColor = color ? color : genRandomColor();
-		this._testBackgroundAlpha = alpha;
-		if (this.w && this.h) {
-			this.applySize();
-		}
-	}
-
-	protected applySize():void {
-		if (this._testBackground) {
-			this._testBackground.clear();
-			this._testBackground.lineStyle(2, this._testBackgroundColor, 1, 0);
-			this._testBackground.beginFill(this._testBackgroundColor, this._testBackgroundAlpha);
-			this._testBackground.drawRect(0, 0, this.w, this.h);
-		}
-	}
-
-	private calculatePixels(parentSize:number, value:number|string):number {
-		if (value === undefined) {
-			return 0;
-		} else if (typeof value === 'string') {
-			return Math.floor(parentSize * Number(value.slice(0, -1)) / 100);
-		} else {
-			return Math.floor(value);
-		}
-	}
-
+	
 	public align(child:Container|View, alignment:IAlignment):void {
 		let newW:number = 0;
 		let newH:number = 0;
@@ -97,25 +58,29 @@ export default class View extends Container {
 	}
 
 	private alignDirection(
-		beforeSize:number|string,
-		size:number|string,
-		afterSize:number|string,
+		beforeSize:number,
+		size:number,
+		afterSize:number,
 		parentSize:number,
 		setPos:(pos:number) => void,
 		setSize:(newSize:number) => void,
 	):void {
 		if (size === undefined) {
-			const pos:number = this.calculatePixels(parentSize, beforeSize);
-			setPos(pos);
-			setSize(parentSize - pos - this.calculatePixels(parentSize, afterSize));
+			const newPos:number = this.calculatePixels(beforeSize);
+			setPos(newPos);
+			setSize(parentSize - newPos - this.calculatePixels(afterSize));
 		} else if (afterSize === undefined) {
-			setSize(this.calculatePixels(parentSize, size));
-			setPos(this.calculatePixels(parentSize, beforeSize));
+			setSize(this.calculatePixels(size));
+			setPos(this.calculatePixels(beforeSize));
 		} else if (beforeSize === undefined) {
-			const newSize:number = this.calculatePixels(parentSize, size);
+			const newSize:number = this.calculatePixels(size);
 			setSize(newSize);
-			setPos(parentSize - newSize - this.calculatePixels(parentSize, afterSize));
+			setPos(parentSize - newSize - this.calculatePixels(afterSize));
 		}
+	}
+
+	private calculatePixels(value:number):number {
+		return value ? Math.floor(value) : 0;
 	}
 
 	public center(child:Container|View):void {
@@ -133,16 +98,45 @@ export default class View extends Container {
 		child.y = Math.floor((this.h - childHeight) / 2);
 	}
 
+	//////////////////////
+	// override methods //
+	//////////////////////
+
+	protected applySize():void {
+		if (this._testBackground) {
+			this._testBackground.clear();
+			this._testBackground.lineStyle(2, this._testBackgroundColor, 1, 0);
+			this._testBackground.beginFill(this._testBackgroundColor, this._testBackgroundAlpha);
+			this._testBackground.drawRect(0, 0, this.w, this.h);
+		}
+	}
+
+	//////////////////
+	// test methods //
+	//////////////////
+
+	public showTestBackground(color?:number, alpha:number = .5):void {
+		if (!this._testBackground) {
+			this._testBackground = new Graphics();
+			this.addChildAt(this._testBackground, 0);
+		}
+		this._testBackgroundColor = color ? color : genRandomColor();
+		this._testBackgroundAlpha = alpha;
+		if (this.w && this.h) {
+			this.applySize();
+		}
+	}
+
 	public getStringSize():string {
 		return this.w + "x" + this.h;
 	}
 }
 
 export interface IAlignment {
-	left?:number|string;
-	right?:number|string;
-	top?:number|string;
-	bottom?:number|string;
-	w?:number|string;
-	h?:number|string;
+	left?:number;
+	right?:number;
+	top?:number;
+	bottom?:number;
+	w?:number;
+	h?:number;
 }

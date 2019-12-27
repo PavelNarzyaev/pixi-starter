@@ -32,23 +32,21 @@ export default class OneLineTextField extends View {
 		}
 	}
 
-	public setStyle(value:TextStyle, applyImmediately:boolean = false):void {
+	public setStyle(value:TextStyle):void {
 		this._style = value;
-		if (applyImmediately) {
+		if (this._text) {
 			this.refresh();
 		}
 	}
 
-	public setText(value:string, applyImmediately:boolean = false):void {
+	public setText(value:string):void {
 		if (this._text !== value) {
 			this._text = value;
-			if (applyImmediately) {
-				this.refresh();
-			}
+			this.refresh();
 		}
 	}
 
-	public refresh():void {
+	private refresh():void {
 		if (!this._field) {
 			this._field = this.addChild(new Text(this._text, this._style));
 		} else {

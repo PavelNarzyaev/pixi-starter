@@ -11,6 +11,8 @@ export default class SliderAbstract extends View {
 	private _background:View;
 	private _pointerDownPosition:number;
 	private _percent:number = 0;
+	private _thumbPositionInvalidated:boolean = false;
+	private _thumbSizeInvalidated:boolean = false;
 
 	constructor() {
 		super();
@@ -36,30 +38,45 @@ export default class SliderAbstract extends View {
 		const correctedPosition:number = Math.round(Math.max(0, Math.min(maxPosition, targetPosition)));
 		if (this.getThumbPosition() !== correctedPosition) {
 			this._percent = correctedPosition / maxPosition;
-			this.refreshThumbPosition();
+			this._thumbPositionInvalidated = true;
+			this.validateThumbPosition();
 			this.emit(SliderAbstract.CHANGE_PERCENT, this);
 		}
-	}
-
-	private refreshThumbPosition():void {
-		this.setThumbPosition(Math.round(this.calculateMaxThumbPosition() * this._percent));
 	}
 
 	protected applySize():void {
 		super.applySize();
 		if (this.visible) {
-			this.alignThumb();
-			this.refreshThumbPosition();
 			this._background.setSize(this.w, this.h);
+			this._thumbSizeInvalidated = true;
+			this._thumbPositionInvalidated = true;
+			this.validate();
 		}
 	}
 
-	public setPercent(value:number, applyImmediately:boolean = true) {
+	public validate():void {
+		this.validateThumbSize();
+		this.validateThumbPosition();
+	}
+
+	private validateThumbSize():void {
+		if (this._thumbSizeInvalidated) {
+			this.refreshThumbSize();
+			this._thumbSizeInvalidated = false;
+		}
+	}
+
+	private validateThumbPosition():void {
+		if (this._thumbPositionInvalidated) {
+			this.setThumbPosition(Math.round(this.calculateMaxThumbPosition() * this._percent));
+			this._thumbPositionInvalidated = false;
+		}
+	}
+
+	public setPercent(value:number) {
 		if (this._percent !== value) {
 			this._percent = Math.min(1, Math.max(0, value));
-			if (applyImmediately) {
-				this.refreshThumbPosition();
-			}
+			this._thumbPositionInvalidated = true;
 		}
 	}
 
@@ -67,12 +84,10 @@ export default class SliderAbstract extends View {
 		return this._percent;
 	}
 
-	public setThumbPercentSize(value:number, applyImmediately:boolean = false):void {
+	public setThumbPercentSize(value:number):void {
 		this._thumbSizePercent = value;
-		if (applyImmediately) {
-			this.alignThumb();
-			this.refreshThumbPosition();
-		}
+		this._thumbSizeInvalidated = true;
+		this._thumbPositionInvalidated = true;
 	}
 
 	protected calculateThumbSize():number {
@@ -103,7 +118,7 @@ export default class SliderAbstract extends View {
 		return null;
 	}
 
-	protected alignThumb():void {
+	protected refreshThumbSize():void {
 	}
 
 	//////////////////////////////

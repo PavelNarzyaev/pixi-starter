@@ -1,8 +1,7 @@
-import View from "../View";
+import View, {IAlignment} from "../View";
 import SliderAbstractH from "./sliders/SliderAbstractH";
 import SliderAbstractV from "./sliders/SliderAbstractV";
 import SliderAbstract from "./sliders/SliderAbstract";
-import DisplayObject = PIXI.DisplayObject;
 import GraphicsView from "../GraphicsView";
 
 export default class ScrollAbstract extends View {
@@ -10,6 +9,7 @@ export default class ScrollAbstract extends View {
 	private _verticalSlider:SliderAbstractV;
 	private _corner:GraphicsView;
 	private _contentContainer:View;
+	private _content:View;
 
 	constructor(
 		private _enabledHorizontal:boolean = false,
@@ -52,22 +52,18 @@ export default class ScrollAbstract extends View {
 		}
 	}
 
-	public setContainerSize(w:number, h:number, applyImmediately:boolean = false):void {
-		this._contentContainer.setSize(w, h);
-		if (this._horizontalSlider) {
-			this._horizontalSlider.setThumbPercentSize(this.w / this._contentContainer.w, applyImmediately);
-		}
-		if (this._verticalSlider) {
-			this._verticalSlider.setThumbPercentSize(this.h / this._contentContainer.h, applyImmediately);
-		}
+	public addContent<T extends View>(content:T):T {
+		this._content = this._contentContainer.addChild(content);
+		this._content.x = this._content.y = this.getSliderThickness();
+		this._content.addListener(View.RESIZE, this.refresh, this);
+		return content;
 	}
 
-	public addContent<T extends DisplayObject>(content:T):T {
-		return this._contentContainer.addChild(content);
-	}
-
-	public removeContent(content:DisplayObject):void {
-		this._contentContainer.removeChild(content);
+	public removeContent():void {
+		if (this._content) {
+			this._content.removeListener(View.RESIZE, this.refresh, this);
+			this._content.parent.removeChild(this._content);
+		}
 	}
 
 	private refreshContentPosition(
@@ -82,84 +78,80 @@ export default class ScrollAbstract extends View {
 
 	protected applySize():void {
 		super.applySize();
-		this.refreshSliders();
-		this.alignSliders();
-		this.alignCorner();
-		this.alignContainer();
+		this.refresh();
 	}
 
-	private refreshSliders():void {
-		this.refreshSlider(
+	private refresh():void {
+		this.refreshContainerSize();
+		this.refreshSliderVisibility(this._horizontalSlider, this.w, this._contentContainer.w);
+		this.refreshSliderVisibility(this._verticalSlider, this.h, this._contentContainer.h);
+		this.refreshDirection(
 			this._horizontalSlider,
 			this.w,
 			this._contentContainer.w,
 			this._contentContainer.x,
+			{
+				bottom: 0,
+				w: this.sliderIsVisible(this._verticalSlider) ? this.w - this.getSliderThickness() : this.w,
+				h: this.getSliderThickness(),
+			},
+			() => this.centerHorizontal(this._contentContainer),
 			position => this._contentContainer.x = position
 		);
-		this.refreshSlider(
+		this.refreshDirection(
 			this._verticalSlider,
 			this.h,
 			this._contentContainer.h,
 			this._contentContainer.y,
+			{
+				right: 0,
+				w: this.getSliderThickness(),
+				h: this.sliderIsVisible(this._horizontalSlider) ? this.h - this.getSliderThickness() : this.h,
+			},
+			() => this.centerVertical(this._contentContainer),
 			position => this._contentContainer.y = position
+		);
+		this.alignCorner();
+	}
+
+	private refreshSliderVisibility(slider:SliderAbstract, currentSize:number, contentSize:number):void {
+		slider.visible = currentSize < contentSize;
+	}
+
+	private refreshContainerSize():void {
+		const increaseContainerSize:number = this.getSliderThickness() * 2;
+		this._contentContainer.setSize(
+			this._content.w + increaseContainerSize,
+			this._content.h + increaseContainerSize,
 		);
 	}
 
-	private refreshSlider(
+	private refreshDirection(
 		slider:SliderAbstract,
 		currentSize:number,
-		contentSize:number,
-		contentPosition:number,
-		setContentPosition:(position:number) => void
+		containerSize:number,
+		containerPosition:number,
+		sliderAlignment:IAlignment,
+		centerContainer:() => void,
+		setContainerPosition:(position:number) => void,
 	):void {
-		if (slider) {
-			slider.visible = currentSize < contentSize;
-			if (slider.visible) {
-				const minPosition:number = currentSize - contentSize;
-				const calculatedPercent:number = minPosition !== 0 ? contentPosition / minPosition : 0;
-				slider.setPercent(calculatedPercent, false);
-				slider.setThumbPercentSize(currentSize / contentSize, false);
-				if (calculatedPercent > 1) {
-					setContentPosition(minPosition);
-				}
-			}
-		}
-	}
+		if (this.sliderIsVisible(slider)) {
+			const minContainerPosition:number = currentSize - containerSize;
+			const calculatedPercent:number = minContainerPosition !== 0 ? containerPosition / minContainerPosition : 0;
+			slider.setPercent(calculatedPercent);
+			slider.setThumbPercentSize(currentSize / containerSize);
+			this.align(slider, sliderAlignment);
+			slider.validate();
 
-	private alignSliders():void {
-		if (this.horizontalSliderIsVisible()) {
-			this.align(
-				this._horizontalSlider,
-				{
-					bottom: 0,
-					w: this.verticalSliderIsVisible() ? this.w - this.getSliderThickness() : this.w,
-					h: this.getSliderThickness(),
-				}
-			);
+			setContainerPosition(Math.max(minContainerPosition, Math.min(0, containerPosition)));
+		} else {
+			centerContainer();
 		}
-		if (this.verticalSliderIsVisible()) {
-			this.align(
-				this._verticalSlider,
-				{
-					right: 0,
-					w: this.getSliderThickness(),
-					h: this.horizontalSliderIsVisible() ? this.h - this.getSliderThickness() : this.h,
-				}
-			);
-		}
-	}
-
-	private horizontalSliderIsVisible():boolean {
-		return this._horizontalSlider && this._horizontalSlider.visible;
-	}
-
-	private verticalSliderIsVisible():boolean {
-		return this._verticalSlider && this._verticalSlider.visible;
 	}
 
 	private alignCorner():void {
 		if (this._corner) {
-			this._corner.visible = this.horizontalSliderIsVisible() && this.verticalSliderIsVisible();
+			this._corner.visible = this.sliderIsVisible(this._horizontalSlider) && this.sliderIsVisible(this._verticalSlider);
 			if (this._corner.visible) {
 				this.align(
 					this._corner,
@@ -174,13 +166,8 @@ export default class ScrollAbstract extends View {
 		}
 	}
 
-	private alignContainer():void {
-		if (!this.horizontalSliderIsVisible()) {
-			this.centerHorizontal(this._contentContainer);
-		}
-		if (!this.verticalSliderIsVisible()) {
-			this.centerVertical(this._contentContainer);
-		}
+	private sliderIsVisible(slider:SliderAbstract):boolean {
+		return slider && slider.visible;
 	}
 
 	//////////////////////

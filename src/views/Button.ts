@@ -40,7 +40,7 @@ export default class Button extends InteractiveView {
 	protected applySize():void {
 		super.applySize();
 		this.refreshTexture();
-		this._nameField.setSize("80%", "60%");
+		this._nameField.setSize(this.w * .8, this.h * .6);
 		this.center(this._nameField);
 	}
 

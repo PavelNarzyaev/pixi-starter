@@ -66,7 +66,7 @@ class NameAndValueFields extends View {
 	}
 
 	public setValue(value:string):void {
-		this._valueField.setText(value, true);
+		this._valueField.setText(value);
 	}
 
 	protected applySize():void {
