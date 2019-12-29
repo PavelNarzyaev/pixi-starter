@@ -8,7 +8,7 @@ import {POINTER_DOWN, POINTER_MOVE, POINTER_UP, POINTER_UP_OUTSIDE} from "../../
 import InteractionEvent = PIXI.interaction.InteractionEvent;
 
 export default class ScrollAbstract extends View {
-	private _invisibleBackground:GraphicsView;
+	private _interactiveBackground:GraphicsView;
 	private _horizontalSlider:SliderAbstractH;
 	private _verticalSlider:SliderAbstractV;
 	private _corner:GraphicsView;
@@ -21,12 +21,12 @@ export default class ScrollAbstract extends View {
 		private _enabledVertical:boolean = true,
 	) {
 		super();
-		this._invisibleBackground = this.addChild(new GraphicsView(0xffffff));
-		this._invisibleBackground.interactive = true;
-		this._invisibleBackground.alpha = 0;
-		this._invisibleBackground.on(POINTER_DOWN, this.invisibleBackgroundPointerDownHandler, this);
-		this._invisibleBackground.on(POINTER_UP, this.invisibleBackgroundPointerUpHandler, this);
-		this._invisibleBackground.on(POINTER_UP_OUTSIDE, this.invisibleBackgroundPointerUpHandler, this);
+		this._interactiveBackground = this.addChild(new GraphicsView(0xffffff));
+		this._interactiveBackground.interactive = true;
+		this._interactiveBackground.alpha = 0;
+		this._interactiveBackground.on(POINTER_DOWN, this.invisibleBackgroundPointerDownHandler, this);
+		this._interactiveBackground.on(POINTER_UP, this.invisibleBackgroundPointerUpHandler, this);
+		this._interactiveBackground.on(POINTER_UP_OUTSIDE, this.invisibleBackgroundPointerUpHandler, this);
 		this._contentContainer = this.addChild(new View());
 		if (this._enabledHorizontal) {
 			this._horizontalSlider = this.addChild(this.horizontalSliderFactory());
@@ -80,12 +80,12 @@ export default class ScrollAbstract extends View {
 
 	private invisibleBackgroundPointerDownHandler(event:InteractionEvent):void {
 		this._contentContainerMovingShift = this._contentContainer.toLocal(event.data.global);
-		this._invisibleBackground.on(POINTER_MOVE, this.invisibleBackgroundMoveHandler, this);
+		this._interactiveBackground.on(POINTER_MOVE, this.invisibleBackgroundMoveHandler, this);
 	}
 
 	private invisibleBackgroundPointerUpHandler():void {
 		this._contentContainerMovingShift = null;
-		this._invisibleBackground.off(POINTER_MOVE, this.invisibleBackgroundMoveHandler, this);
+		this._interactiveBackground.off(POINTER_MOVE, this.invisibleBackgroundMoveHandler, this);
 	}
 
 	private invisibleBackgroundMoveHandler(event:InteractionEvent):void {
@@ -134,7 +134,7 @@ export default class ScrollAbstract extends View {
 
 	protected applySize():void {
 		super.applySize();
-		this._invisibleBackground.setSize(this.w, this.h);
+		this._interactiveBackground.setSize(this.w, this.h);
 		this.refresh();
 	}
 

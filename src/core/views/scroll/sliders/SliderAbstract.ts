@@ -73,7 +73,6 @@ export default class SliderAbstract extends View {
 			this._background.setSize(this.w, this.h);
 			this._thumbSizeInvalidated = true;
 			this._thumbPositionInvalidated = true;
-			this.validate();
 		}
 	}
 

@@ -12,7 +12,7 @@ export default class MainView extends View {
 	constructor() {
 		super();
 
-		this._background = this.addChild(new TilingSprite(Texture.from("img/background.png"), 100, 100));
+		this._background = this.addChild(new TilingSprite(Texture.from("img/background.png")));
 		this._scroll = this.addChild(new Scroll(true));
 		this._mainContent = this._scroll.addContent(new MainContent());
 	}
