@@ -9,7 +9,7 @@ export default class SliderAbstract extends View {
 	protected _thumb:InteractiveView;
 	private _thumbSizePercent:number;
 	private _background:View;
-	private _thumbPointerDownPosition:number;
+	private _thumbMovingShift:number;
 	private _percent:number = 0;
 	private _thumbPositionInvalidated:boolean = false;
 	private _thumbSizeInvalidated:boolean = false;
@@ -37,7 +37,7 @@ export default class SliderAbstract extends View {
 	}
 
 	private pressThumb(event:InteractionEvent):void {
-		this._thumbPointerDownPosition = this.getPointPosition(this._thumb.toLocal(event.data.global));
+		this._thumbMovingShift = this.getPointPosition(this._thumb.toLocal(event.data.global));
 		this._thumb.press();
 		this._thumb.on(POINTER_MOVE, this.pointerMoveHandler, this);
 	}
@@ -53,7 +53,7 @@ export default class SliderAbstract extends View {
 
 	private pointerMoveHandler(event:InteractionEvent):void {
 		const eventPosition:number = this.getPointPosition(this.toLocal(event.data.global));
-		this.moveThumbToPosition(eventPosition - this._thumbPointerDownPosition);
+		this.moveThumbToPosition(eventPosition - this._thumbMovingShift);
 	}
 
 	private moveThumbToPosition(targetPosition:number):void {

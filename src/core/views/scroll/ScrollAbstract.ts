@@ -9,11 +9,11 @@ import InteractionEvent = PIXI.interaction.InteractionEvent;
 
 export default class ScrollAbstract extends View {
 	private _invisibleBackground:GraphicsView;
-	private _invisibleBackgroundPointerDown:IPoint;
 	private _horizontalSlider:SliderAbstractH;
 	private _verticalSlider:SliderAbstractV;
 	private _corner:GraphicsView;
 	private _contentContainer:View;
+	private _contentContainerMovingShift:IPoint;
 	private _content:View;
 
 	constructor(
@@ -79,12 +79,12 @@ export default class ScrollAbstract extends View {
 	}
 
 	private invisibleBackgroundPointerDownHandler(event:InteractionEvent):void {
-		this._invisibleBackgroundPointerDown = this._contentContainer.toLocal(event.data.global);
+		this._contentContainerMovingShift = this._contentContainer.toLocal(event.data.global);
 		this._invisibleBackground.on(POINTER_MOVE, this.invisibleBackgroundMoveHandler, this);
 	}
 
 	private invisibleBackgroundPointerUpHandler():void {
-		this._invisibleBackgroundPointerDown = null;
+		this._contentContainerMovingShift = null;
 		this._invisibleBackground.off(POINTER_MOVE, this.invisibleBackgroundMoveHandler, this);
 	}
 
@@ -94,14 +94,14 @@ export default class ScrollAbstract extends View {
 			this._horizontalSlider,
 			this.w,
 			this._contentContainer.w,
-			eventPoint.x - this._invisibleBackgroundPointerDown.x,
+			eventPoint.x - this._contentContainerMovingShift.x,
 			position => this._contentContainer.x = position,
 		);
 		this.moveContainer(
 			this._verticalSlider,
 			this.h,
 			this._contentContainer.h,
-			eventPoint.y - this._invisibleBackgroundPointerDown.y,
+			eventPoint.y - this._contentContainerMovingShift.y,
 			position => this._contentContainer.y = position,
 		);
 	}
@@ -134,8 +134,8 @@ export default class ScrollAbstract extends View {
 
 	protected applySize():void {
 		super.applySize();
+		this._invisibleBackground.setSize(this.w, this.h);
 		this.refresh();
-		this._invisibleBackground.setSize(this._contentContainer.w, this._contentContainer.h);
 	}
 
 	private refresh():void {
