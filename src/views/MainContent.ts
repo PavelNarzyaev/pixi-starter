@@ -52,7 +52,7 @@ export default class MainContent extends View {
 
 		this._button.setSize(150, 50);
 		this._selectableButton.setSize(200, 50);
-		this._info.setSize(400, 100);
+		this._info.setSize(400, 200);
 
 		const gap:number = 10;
 		let elementsHeight:number = 0;

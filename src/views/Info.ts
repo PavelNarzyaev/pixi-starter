@@ -1,14 +1,26 @@
 import View from "../core/views/View";
 import OneLineTextField from "../core/views/OneLineTextField";
 import TextStyle = PIXI.TextStyle;
+import NineSlicePlane = PIXI.NineSlicePlane;
+import Texture = PIXI.Texture;
 
 export default class Info extends View {
+	private _border:NineSlicePlane;
 	private _clicksNameField:NameAndValueFields;
 	private _selectedNameField:NameAndValueFields;
 	private _elements:View[] = [];
 
 	constructor() {
 		super();
+		this._border = this.addChild(
+			new NineSlicePlane(
+				Texture.from("img/info_border.png"),
+				10,
+				10,
+				10,
+				10
+			)
+		);
 		this._clicksNameField = this.initElement(new NameAndValueFields("Clicks:"));
 		this._selectedNameField = this.initElement(new NameAndValueFields("Selected:"));
 	}
@@ -28,6 +40,8 @@ export default class Info extends View {
 
 	protected applySize():void {
 		super.applySize();
+		this._border.width = this.w;
+		this._border.height = this.h;
 		const elementHeight:number = 40;
 		const elementsHeight:number = this._elements.length * elementHeight;
 		let nextY:number = Math.floor((this.h - elementsHeight) / 2);
