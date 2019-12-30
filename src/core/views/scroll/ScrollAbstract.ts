@@ -15,6 +15,7 @@ export default class ScrollAbstract extends View {
 	private _contentContainer:View;
 	private _contentContainerMovingShift:IPoint;
 	private _content:View;
+	private _wheelListener:(event:WheelEvent) => void;
 
 	constructor(
 		private _enabledHorizontal:boolean = false,
@@ -169,6 +170,18 @@ export default class ScrollAbstract extends View {
 			position => this._contentContainer.y = position
 		);
 		this.alignCorner();
+		const hasVisibleSlider:boolean = this.sliderIsVisible(this._verticalSlider) || this.sliderIsVisible(this._horizontalSlider);
+		if (!this._wheelListener && hasVisibleSlider) {
+			this._wheelListener = this.mouseWheelHandler;
+			window.addEventListener("mousewheel", this._wheelListener, { passive:false });
+		} else if (this._wheelListener && !hasVisibleSlider) {
+			window.removeEventListener("mousewheel", this._wheelListener);
+			this._wheelListener = null;
+		}
+	}
+
+	private mouseWheelHandler(e:WheelEvent):void {
+		console.log("wheel");
 	}
 
 	private refreshSliderVisibility(slider:SliderAbstract, currentSize:number, contentSize:number):void {
