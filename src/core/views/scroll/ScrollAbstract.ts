@@ -91,18 +91,26 @@ export default class ScrollAbstract extends View {
 
 	private invisibleBackgroundMoveHandler(event:InteractionEvent):void {
 		const eventPoint:IPoint = this.toLocal(event.data.global);
+		this.moveContainerByX(eventPoint.x - this._contentContainerMovingShift.x);
+		this.moveContainerByY(eventPoint.y - this._contentContainerMovingShift.y);
+	}
+
+	private moveContainerByX(targetX:number):void {
 		this.moveContainer(
 			this._horizontalSlider,
 			this.w,
 			this._contentContainer.w,
-			eventPoint.x - this._contentContainerMovingShift.x,
+			targetX,
 			position => this._contentContainer.x = position,
 		);
+	}
+
+	private moveContainerByY(targetY:number):void {
 		this.moveContainer(
 			this._verticalSlider,
 			this.h,
 			this._contentContainer.h,
-			eventPoint.y - this._contentContainerMovingShift.y,
+			targetY,
 			position => this._contentContainer.y = position,
 		);
 	}
@@ -172,7 +180,7 @@ export default class ScrollAbstract extends View {
 		this.alignCorner();
 		const hasVisibleSlider:boolean = this.sliderIsVisible(this._verticalSlider) || this.sliderIsVisible(this._horizontalSlider);
 		if (!this._wheelListener && hasVisibleSlider) {
-			this._wheelListener = this.mouseWheelHandler;
+			this._wheelListener = this.mouseWheelHandler.bind(this);
 			window.addEventListener("mousewheel", this._wheelListener, { passive:false });
 		} else if (this._wheelListener && !hasVisibleSlider) {
 			window.removeEventListener("mousewheel", this._wheelListener);
@@ -181,7 +189,18 @@ export default class ScrollAbstract extends View {
 	}
 
 	private mouseWheelHandler(e:WheelEvent):void {
-		console.log("wheel");
+		let shift:number = 50;
+		if (this.sliderIsVisible(this._verticalSlider)) {
+			if (e.deltaY > 0) {
+				shift *= -1;
+			}
+			this.moveContainerByY(this._contentContainer.y + shift);
+		} else {
+			if (e.deltaY < 0) {
+				shift *= -1;
+			}
+			this.moveContainerByX(this._contentContainer.x + shift);
+		}
 	}
 
 	private refreshSliderVisibility(slider:SliderAbstract, currentSize:number, contentSize:number):void {
