@@ -6,14 +6,15 @@ import GraphicsView from "../GraphicsView";
 import IPoint = PIXI.IPoint;
 import {POINTER_DOWN, POINTER_MOVE, POINTER_UP, POINTER_UP_OUTSIDE} from "../../../PointerEvents";
 import InteractionEvent = PIXI.interaction.InteractionEvent;
+import Container = PIXI.Container;
 
 export default class ScrollAbstract extends View {
 	private _interactiveBackground:GraphicsView;
 	private _horizontalSlider:SliderAbstractH;
 	private _verticalSlider:SliderAbstractV;
 	private _corner:GraphicsView;
-	private _contentContainer:View;
-	private _contentContainerMovingShift:IPoint;
+	private _contentLayer:Container;
+	private _contentMovingShift:IPoint;
 	private _content:View;
 	private _wheelListener:(event:WheelEvent) => void;
 
@@ -25,10 +26,10 @@ export default class ScrollAbstract extends View {
 		this._interactiveBackground = this.addChild(new GraphicsView(0xffffff));
 		this._interactiveBackground.interactive = true;
 		this._interactiveBackground.alpha = 0;
-		this._interactiveBackground.on(POINTER_DOWN, this.invisibleBackgroundPointerDownHandler, this);
-		this._interactiveBackground.on(POINTER_UP, this.invisibleBackgroundPointerUpHandler, this);
-		this._interactiveBackground.on(POINTER_UP_OUTSIDE, this.invisibleBackgroundPointerUpHandler, this);
-		this._contentContainer = this.addChild(new View());
+		this._interactiveBackground.on(POINTER_DOWN, this.interactiveBackgroundPointerDownHandler, this);
+		this._interactiveBackground.on(POINTER_UP, this.interactiveBackgroundPointerUpHandler, this);
+		this._interactiveBackground.on(POINTER_UP_OUTSIDE, this.interactiveBackgroundPointerUpHandler, this);
+		this._contentLayer = this.addChild(new Container());
 		if (this._enabledHorizontal) {
 			this._horizontalSlider = this.addChild(this.horizontalSliderFactory());
 			this._horizontalSlider.addListener(
@@ -36,9 +37,9 @@ export default class ScrollAbstract extends View {
 				() => {
 					this.refreshContentPosition(
 						this.w,
-						this._contentContainer.w,
+						this._content.w,
 						this._horizontalSlider.getPercent(),
-						position => this._contentContainer.x = position,
+						position => this._content.x = position,
 					)
 				},
 				this,
@@ -51,9 +52,9 @@ export default class ScrollAbstract extends View {
 				() => {
 					this.refreshContentPosition(
 						this.h,
-						this._contentContainer.h,
+						this._content.h,
 						this._verticalSlider.getPercent(),
-						position => this._contentContainer.y = position,
+						position => this._content.y = position,
 					)
 				},
 				this,
@@ -66,8 +67,7 @@ export default class ScrollAbstract extends View {
 	}
 
 	public addContent<T extends View>(content:T):T {
-		this._content = this._contentContainer.addChild(content);
-		this._content.x = this._content.y = this.getSliderThickness();
+		this._content = this._contentLayer.addChild(content);
 		this._content.addListener(View.RESIZE, this.refresh, this);
 		return content;
 	}
@@ -79,54 +79,54 @@ export default class ScrollAbstract extends View {
 		}
 	}
 
-	private invisibleBackgroundPointerDownHandler(event:InteractionEvent):void {
-		this._contentContainerMovingShift = this._contentContainer.toLocal(event.data.global);
-		this._interactiveBackground.on(POINTER_MOVE, this.invisibleBackgroundMoveHandler, this);
+	private interactiveBackgroundPointerDownHandler(event:InteractionEvent):void {
+		this._contentMovingShift = this._content.toLocal(event.data.global);
+		this._interactiveBackground.on(POINTER_MOVE, this.interactiveBackgroundMoveHandler, this);
 	}
 
-	private invisibleBackgroundPointerUpHandler():void {
-		this._contentContainerMovingShift = null;
-		this._interactiveBackground.off(POINTER_MOVE, this.invisibleBackgroundMoveHandler, this);
+	private interactiveBackgroundPointerUpHandler():void {
+		this._contentMovingShift = null;
+		this._interactiveBackground.off(POINTER_MOVE, this.interactiveBackgroundMoveHandler, this);
 	}
 
-	private invisibleBackgroundMoveHandler(event:InteractionEvent):void {
+	private interactiveBackgroundMoveHandler(event:InteractionEvent):void {
 		const eventPoint:IPoint = this.toLocal(event.data.global);
-		this.moveContainerByX(eventPoint.x - this._contentContainerMovingShift.x);
-		this.moveContainerByY(eventPoint.y - this._contentContainerMovingShift.y);
+		this.moveContentByX(eventPoint.x - this._contentMovingShift.x);
+		this.moveContentByY(eventPoint.y - this._contentMovingShift.y);
 	}
 
-	private moveContainerByX(targetX:number):void {
-		this.moveContainer(
+	private moveContentByX(targetX:number):void {
+		this.moveContent(
 			this._horizontalSlider,
 			this.w,
-			this._contentContainer.w,
+			this._content.w,
 			targetX,
-			position => this._contentContainer.x = position,
+			position => this._content.x = position,
 		);
 	}
 
-	private moveContainerByY(targetY:number):void {
-		this.moveContainer(
+	private moveContentByY(targetY:number):void {
+		this.moveContent(
 			this._verticalSlider,
 			this.h,
-			this._contentContainer.h,
+			this._content.h,
 			targetY,
-			position => this._contentContainer.y = position,
+			position => this._content.y = position,
 		);
 	}
 
-	private moveContainer(
+	private moveContent(
 		slider:SliderAbstract,
 		currentSize:number,
-		containerSize:number,
-		targetContainerPosition:number,
-		setContainerPosition:(position:number) => void
+		contentSize:number,
+		targetPosition:number,
+		setPosition:(position:number) => void
 	):void {
 		if (this.sliderIsVisible(slider)) {
-			const minContainerPosition:number = currentSize - containerSize;
-			const containerPosition:number = Math.max(minContainerPosition, Math.min(0, targetContainerPosition));
-			setContainerPosition(containerPosition);
-			slider.setPercent(containerPosition / minContainerPosition);
+			const minPosition:number = currentSize - contentSize;
+			const correctedPosition:number = Math.max(minPosition, Math.min(0, targetPosition));
+			setPosition(correctedPosition);
+			slider.setPercent(correctedPosition / minPosition);
 			slider.validate();
 		}
 	}
@@ -135,10 +135,10 @@ export default class ScrollAbstract extends View {
 		currentSize:number,
 		contentSize:number,
 		percent:number,
-		setContentPosition:(position:number) => void
+		setPosition:(position:number) => void
 	):void {
 		const minPosition:number = currentSize - contentSize;
-		setContentPosition(Math.max(minPosition, Math.min(0, minPosition * percent)));
+		setPosition(Math.max(minPosition, Math.min(0, minPosition * percent)));
 	}
 
 	protected applySize():void {
@@ -148,34 +148,33 @@ export default class ScrollAbstract extends View {
 	}
 
 	private refresh():void {
-		this.refreshContainerSize();
-		this.refreshSliderVisibility(this._horizontalSlider, this.w, this._contentContainer.w);
-		this.refreshSliderVisibility(this._verticalSlider, this.h, this._contentContainer.h);
+		this.refreshSliderVisibility(this._horizontalSlider, this.w, this._content.w);
+		this.refreshSliderVisibility(this._verticalSlider, this.h, this._content.h);
 		this.refreshDirection(
 			this._horizontalSlider,
 			this.w,
-			this._contentContainer.w,
-			this._contentContainer.x,
+			this._content.w,
+			this._content.x,
 			{
 				bottom: 0,
 				w: this.sliderIsVisible(this._verticalSlider) ? this.w - this.getSliderThickness() : this.w,
 				h: this.getSliderThickness(),
 			},
-			() => this.centerHorizontal(this._contentContainer),
-			position => this._contentContainer.x = position
+			() => this.centerHorizontal(this._content),
+			position => this._content.x = position
 		);
 		this.refreshDirection(
 			this._verticalSlider,
 			this.h,
-			this._contentContainer.h,
-			this._contentContainer.y,
+			this._content.h,
+			this._content.y,
 			{
 				right: 0,
 				w: this.getSliderThickness(),
 				h: this.sliderIsVisible(this._horizontalSlider) ? this.h - this.getSliderThickness() : this.h,
 			},
-			() => this.centerVertical(this._contentContainer),
-			position => this._contentContainer.y = position
+			() => this.centerVertical(this._content),
+			position => this._content.y = position
 		);
 		this.alignCorner();
 		const hasVisibleSlider:boolean = this.sliderIsVisible(this._verticalSlider) || this.sliderIsVisible(this._horizontalSlider);
@@ -194,12 +193,12 @@ export default class ScrollAbstract extends View {
 			if (e.deltaY > 0) {
 				shift *= -1;
 			}
-			this.moveContainerByY(this._contentContainer.y + shift);
+			this.moveContentByY(this._content.y + shift);
 		} else {
 			if (e.deltaY < 0) {
 				shift *= -1;
 			}
-			this.moveContainerByX(this._contentContainer.x + shift);
+			this.moveContentByX(this._content.x + shift);
 		}
 	}
 
@@ -207,33 +206,25 @@ export default class ScrollAbstract extends View {
 		slider.visible = currentSize < contentSize;
 	}
 
-	private refreshContainerSize():void {
-		const increaseContainerSize:number = this.getSliderThickness() * 2;
-		this._contentContainer.setSize(
-			this._content.w + increaseContainerSize,
-			this._content.h + increaseContainerSize,
-		);
-	}
-
 	private refreshDirection(
 		slider:SliderAbstract,
 		currentSize:number,
-		containerSize:number,
-		containerPosition:number,
+		contentSize:number,
+		contentPosition:number,
 		sliderAlignment:IAlignment,
-		centerContainer:() => void,
-		setContainerPosition:(position:number) => void,
+		centerContent:() => void,
+		setContentPosition:(position:number) => void,
 	):void {
 		if (this.sliderIsVisible(slider)) {
-			const minContainerPosition:number = currentSize - containerSize;
-			slider.setPercent(containerPosition / minContainerPosition);
-			slider.setThumbPercentSize(currentSize / containerSize);
+			const minContentPosition:number = currentSize - contentSize;
+			slider.setPercent(contentPosition / minContentPosition);
+			slider.setThumbPercentSize(currentSize / contentSize);
 			this.align(slider, sliderAlignment);
 			slider.validate();
 
-			setContainerPosition(Math.max(minContainerPosition, Math.min(0, containerPosition)));
+			setContentPosition(Math.max(minContentPosition, Math.min(0, contentPosition)));
 		} else {
-			centerContainer();
+			centerContent();
 		}
 	}
 

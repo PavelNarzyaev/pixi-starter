@@ -2,8 +2,11 @@ import View from "../core/views/View";
 import Button from "./Button";
 import InteractiveView from "../core/views/InteractiveView";
 import Info from "./Info";
+import TilingSprite = PIXI.TilingSprite;
+import Texture = PIXI.Texture;
 
 export default class MainContent extends View {
+	private _background:TilingSprite;
 	private _button:Button;
 	private _selectableButton:Button;
 	private _info:Info;
@@ -14,6 +17,7 @@ export default class MainContent extends View {
 	constructor() {
 		super();
 
+		this._background = this.addChild(new TilingSprite(Texture.from("img/background.png")));
 		this._button = this.initElement(new Button("Button"));
 		this._selectableButton = this.initElement(new Button("Selectable", true));
 		this._info = this.initElement(new Info());
@@ -50,6 +54,8 @@ export default class MainContent extends View {
 	protected applySize():void {
 		super.applySize();
 
+		this._background.width = this.w;
+		this._background.height = this.h;
 		this._button.setSize(150, 50);
 		this._selectableButton.setSize(200, 50);
 		this._info.setSize(400, 200);
