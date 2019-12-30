@@ -6,9 +6,10 @@ import Texture = PIXI.Texture;
 
 export default class Info extends View {
 	private _border:NineSlicePlane;
-	private _clicksNameField:NameAndValueFields;
-	private _selectedNameField:NameAndValueFields;
-	private _elements:View[] = [];
+	private _clicksLine:NameAndValueLine;
+	private _selectedLine:NameAndValueLine;
+	private _itemLine:NameAndValueLine;
+	private _lines:View[] = [];
 
 	constructor() {
 		super();
@@ -21,20 +22,25 @@ export default class Info extends View {
 				10
 			)
 		);
-		this._clicksNameField = this.initElement(new NameAndValueFields("Clicks:"));
-		this._selectedNameField = this.initElement(new NameAndValueFields("Selected:"));
+		this._clicksLine = this.initLine(new NameAndValueLine("Clicks:"));
+		this._selectedLine = this.initLine(new NameAndValueLine("Selected:"));
+		this._itemLine = this.initLine(new NameAndValueLine("Value:"));
 	}
 
 	public setClicks(value:number):void {
-		this._clicksNameField.setValue(value.toString());
+		this._clicksLine.setValue(value.toString());
 	}
 
 	public setSelected(value:boolean):void {
-		this._selectedNameField.setValue(String(value));
+		this._selectedLine.setValue(String(value));
 	}
 
-	private initElement<T extends View>(element:T):T {
-		this._elements.push(element);
+	public setItem(value:string):void {
+		this._itemLine.setValue(value);
+	}
+
+	private initLine<T extends View>(element:T):T {
+		this._lines.push(element);
 		return this.addChild(element);
 	}
 
@@ -43,9 +49,9 @@ export default class Info extends View {
 		this._border.width = this.w;
 		this._border.height = this.h;
 		const elementHeight:number = 40;
-		const elementsHeight:number = this._elements.length * elementHeight;
+		const elementsHeight:number = this._lines.length * elementHeight;
 		let nextY:number = Math.floor((this.h - elementsHeight) / 2);
-		this._elements.forEach((element:View) => {
+		this._lines.forEach((element:View) => {
 			element.setSize(this.w, elementHeight);
 			element.y = nextY;
 			nextY += element.h;
@@ -53,7 +59,7 @@ export default class Info extends View {
 	}
 }
 
-class NameAndValueFields extends View {
+class NameAndValueLine extends View {
 	private static _style:TextStyle;
 
 	private _nameField:OneLineTextField;
@@ -61,8 +67,8 @@ class NameAndValueFields extends View {
 
 	constructor(name:string) {
 		super();
-		if (!NameAndValueFields._style) {
-			NameAndValueFields._style = new TextStyle({
+		if (!NameAndValueLine._style) {
+			NameAndValueLine._style = new TextStyle({
 				fill: 0x222222,
 				dropShadow: true,
 				dropShadowColor: 0xffffff,
@@ -72,11 +78,11 @@ class NameAndValueFields extends View {
 			});
 		}
 
-		this._nameField = this.addChild(new OneLineTextField(name, NameAndValueFields._style));
+		this._nameField = this.addChild(new OneLineTextField(name, NameAndValueLine._style));
 		this._nameField.setAlign(OneLineTextField.ALIGN_RIGHT);
 		this._valueField = this.addChild(new OneLineTextField());
 		this._valueField.setAlign(OneLineTextField.ALIGN_LEFT);
-		this._valueField.setStyle(NameAndValueFields._style);
+		this._valueField.setStyle(NameAndValueLine._style);
 	}
 
 	public setValue(value:string):void {

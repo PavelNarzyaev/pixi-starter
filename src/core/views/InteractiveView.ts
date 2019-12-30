@@ -13,7 +13,7 @@ export default class InteractiveView extends View {
 	private _down:boolean = false;
 
 	constructor(
-		protected _selectable:boolean = false,
+		protected _autoSelect:boolean = false,
 	) {
 		super();
 		this.interactive = true;
@@ -56,7 +56,7 @@ export default class InteractiveView extends View {
 		let click:boolean = false;
 		if (this._down) {
 			this._down = false;
-			if (this._selectable) {
+			if (this._autoSelect) {
 				this.setSelected(!this.getSelected());
 			}
 			click = true;
@@ -95,6 +95,10 @@ export default class InteractiveView extends View {
 	public getSelected():boolean {
 		return this._selected;
 	}
+
+	//////////////////////
+	// override methods //
+	//////////////////////
 
 	protected refreshState():void {
 	}

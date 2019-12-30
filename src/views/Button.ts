@@ -13,10 +13,11 @@ export default class Button extends InteractiveView {
 	constructor(
 		private _name:string,
 		selectable:boolean = false,
+		autoSelect:boolean = true,
 	) {
-		super(selectable);
+		super(selectable && autoSelect);
 		this.buttonMode = true;
-		this._texture = this.addChild(new ButtonTexture(this._selectable));
+		this._texture = this.addChild(new ButtonTexture(selectable));
 		this._nameField = this.addChild(
 			new OneLineTextField(
 				this._name,
@@ -30,6 +31,10 @@ export default class Button extends InteractiveView {
 				})
 			)
 		);
+		this.refreshState();
+	}
+
+	public refresh():void {
 		this.refreshState();
 	}
 
