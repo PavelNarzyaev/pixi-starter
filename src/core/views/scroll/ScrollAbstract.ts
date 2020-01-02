@@ -7,12 +7,17 @@ import IPoint = PIXI.IPoint;
 import {POINTER_DOWN, POINTER_MOVE, POINTER_UP, POINTER_UP_OUTSIDE} from "../../../PointerEvents";
 import InteractionEvent = PIXI.interaction.InteractionEvent;
 import Container = PIXI.Container;
+import App from "../../../App";
+import Point = PIXI.Point;
 
 export default class ScrollAbstract extends View {
 	private _interactiveBackground:GraphicsView;
 	private _corner:GraphicsView;
 	private _contentLayer:Container;
 	private _contentMovingShift:IPoint;
+	private _movingPoint1:Point = new Point(null, null);
+	private _movingPoint2:Point = new Point(null, null);
+	private _movingPointsDt:number;
 	private _content:View;
 	private _wheelListener:(event:WheelEvent) => void;
 	private _horizontalDirection:IDirection;
@@ -82,18 +87,91 @@ export default class ScrollAbstract extends View {
 
 	private interactiveBackgroundPointerDownHandler(event:InteractionEvent):void {
 		this._contentMovingShift = this._content.toLocal(event.data.global);
+		this._horizontalDirection.contentSpeed = 0;
+		this._verticalDirection.contentSpeed = 0;
+		this._interactiveBackground.off(POINTER_DOWN, this.interactiveBackgroundPointerDownHandler, this);
+		this._interactiveBackground.on(POINTER_UP, this.interactiveBackgroundPointerUpHandler, this);
+		this._interactiveBackground.on(POINTER_UP_OUTSIDE, this.interactiveBackgroundPointerUpHandler, this);
 		this._interactiveBackground.on(POINTER_MOVE, this.interactiveBackgroundMoveHandler, this);
-	}
-
-	private interactiveBackgroundPointerUpHandler():void {
-		this._contentMovingShift = null;
-		this._interactiveBackground.off(POINTER_MOVE, this.interactiveBackgroundMoveHandler, this);
+		this._movingPoint1.x = this._movingPoint1.y = null;
+		this._movingPoint2.x = this._movingPoint2.y = null;
+		App.pixi.ticker.add(this.refreshMovingPoints, this);
 	}
 
 	private interactiveBackgroundMoveHandler(event:InteractionEvent):void {
 		const eventPoint:IPoint = this.toLocal(event.data.global);
 		this.moveContent(this._horizontalDirection, eventPoint.x - this._contentMovingShift.x);
 		this.moveContent(this._verticalDirection, eventPoint.y - this._contentMovingShift.y);
+	}
+
+	private refreshMovingPoints(dt:number):void {
+		if (this._movingPoint2.x !== null || this._movingPoint2.y !== null) {
+			this._movingPoint1.x = this._movingPoint2.x;
+			this._movingPoint1.y = this._movingPoint2.y;
+			this._movingPointsDt = dt;
+		}
+		const globalPoint:Point = App.pixi.renderer.plugins.interaction.mouse.global;
+		this._movingPoint2.x = globalPoint.x;
+		this._movingPoint2.y = globalPoint.y;
+	}
+
+	private interactiveBackgroundPointerUpHandler():void {
+		this._contentMovingShift = null;
+		this._interactiveBackground.on(POINTER_DOWN, this.interactiveBackgroundPointerDownHandler, this);
+		this._interactiveBackground.off(POINTER_UP, this.interactiveBackgroundPointerUpHandler, this);
+		this._interactiveBackground.off(POINTER_UP_OUTSIDE, this.interactiveBackgroundPointerUpHandler, this);
+		this._interactiveBackground.off(POINTER_MOVE, this.interactiveBackgroundMoveHandler, this);
+		if (this._movingPoint1 && this._movingPoint2) {
+			if (this.sliderIsVisible(this._horizontalDirection)) {
+				this._horizontalDirection.contentSpeed = (this._movingPoint2.x - this._movingPoint1.x) / this._movingPointsDt;
+			}
+			if (this.sliderIsVisible(this._verticalDirection)) {
+				this._verticalDirection.contentSpeed = (this._movingPoint2.y - this._movingPoint1.y) / this._movingPointsDt;
+			}
+		}
+		this.startDirectionAnimation(this._horizontalDirection);
+		this.startDirectionAnimation(this._verticalDirection);
+		App.pixi.ticker.remove(this.refreshMovingPoints, this);
+	}
+
+	private startDirectionAnimation(direction:IDirection):void {
+		this.contentSpeedCorrection(direction);
+		if (this.sliderIsVisible(direction) && !direction.animationHandler && direction.contentSpeed) {
+			direction.animationHandler = (dt:number) => {
+				this.animationStep(direction, dt);
+			};
+			App.pixi.ticker.add(direction.animationHandler);
+		}
+	}
+
+	private stopDirectionAnimation(direction:IDirection):void {
+		if (direction.animationHandler) {
+			App.pixi.ticker.remove(direction.animationHandler);
+			direction.animationHandler = null;
+		}
+	}
+
+	private animationStep(direction:IDirection, dt:number):void {
+		const slowdown:number = .92;
+		if (this.sliderIsVisible(direction)) {
+			this.contentSpeedCorrection(direction);
+			if (direction.contentSpeed) {
+				this.moveContent(direction, direction.getContentPosition() + direction.contentSpeed * dt);
+				direction.contentSpeed *= slowdown;
+			} else {
+				this.stopDirectionAnimation(direction);
+			}
+		}
+	}
+
+	private contentSpeedCorrection(direction:IDirection):void {
+		if (
+			(Math.abs(direction.contentSpeed) < 1) ||
+			(direction.contentSpeed > 0 && direction.getContentPosition() === 0) ||
+			(direction.contentSpeed < 0 && direction.getContentPosition() === direction.contentMinPosition)
+		) {
+			direction.contentSpeed = 0;
+		}
 	}
 
 	private moveContent(direction:IDirection, targetPosition:number):void {
@@ -152,8 +230,7 @@ export default class ScrollAbstract extends View {
 				window.addEventListener("mousewheel", this._wheelListener, {passive: false});
 
 				this._interactiveBackground.on(POINTER_DOWN, this.interactiveBackgroundPointerDownHandler, this);
-				this._interactiveBackground.on(POINTER_UP, this.interactiveBackgroundPointerUpHandler, this);
-				this._interactiveBackground.on(POINTER_UP_OUTSIDE, this.interactiveBackgroundPointerUpHandler, this);
+
 			} else {
 				window.removeEventListener("mousewheel", this._wheelListener);
 				this._wheelListener = null;
@@ -161,6 +238,7 @@ export default class ScrollAbstract extends View {
 				this._interactiveBackground.off(POINTER_DOWN, this.interactiveBackgroundPointerDownHandler, this);
 				this._interactiveBackground.off(POINTER_UP, this.interactiveBackgroundPointerUpHandler, this);
 				this._interactiveBackground.off(POINTER_UP_OUTSIDE, this.interactiveBackgroundPointerUpHandler, this);
+				this._interactiveBackground.off(POINTER_MOVE, this.interactiveBackgroundMoveHandler, this);
 			}
 		}
 	}
@@ -252,4 +330,6 @@ interface IDirection {
 	getScrollSize:() => number,
 	getContentSize:() => number,
 	contentMinPosition?:number,
+	contentSpeed?:number,
+	animationHandler?:(dt:number) => void,
 }
