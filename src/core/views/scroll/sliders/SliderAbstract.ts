@@ -114,7 +114,7 @@ export default class SliderAbstract extends View {
 
 	protected calculateThumbSize():number {
 		const minSize:number = Math.min(30, this.getSliderSize() * 0.5);
-		return Math.max(minSize, this._thumbSizePercent * this.getSliderSize());
+		return Math.floor(Math.max(minSize, this._thumbSizePercent * this.getSliderSize()));
 	}
 
 	//////////////////////////////////

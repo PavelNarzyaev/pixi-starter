@@ -10,60 +10,61 @@ import Container = PIXI.Container;
 
 export default class ScrollAbstract extends View {
 	private _interactiveBackground:GraphicsView;
-	private _horizontalSlider:SliderAbstractH;
-	private _verticalSlider:SliderAbstractV;
 	private _corner:GraphicsView;
 	private _contentLayer:Container;
 	private _contentMovingShift:IPoint;
 	private _content:View;
 	private _wheelListener:(event:WheelEvent) => void;
+	private _horizontalDirection:IDirection;
+	private _verticalDirection:IDirection;
+	private _hasVisibleSlider:boolean;
 
-	constructor(
-		private _enabledHorizontal:boolean = false,
-		private _enabledVertical:boolean = true,
-	) {
+	constructor(enabledHorizontal:boolean = false, enabledVertical:boolean = true) {
 		super();
 		this._interactiveBackground = this.addChild(new GraphicsView(0xffffff));
 		this._interactiveBackground.interactive = true;
 		this._interactiveBackground.alpha = 0;
-		this._interactiveBackground.on(POINTER_DOWN, this.interactiveBackgroundPointerDownHandler, this);
-		this._interactiveBackground.on(POINTER_UP, this.interactiveBackgroundPointerUpHandler, this);
-		this._interactiveBackground.on(POINTER_UP_OUTSIDE, this.interactiveBackgroundPointerUpHandler, this);
 		this._contentLayer = this.addChild(new Container());
-		if (this._enabledHorizontal) {
-			this._horizontalSlider = this.addChild(this.horizontalSliderFactory());
-			this._horizontalSlider.addListener(
+		if (enabledHorizontal) {
+			this._horizontalDirection = {
+				slider: this.addChild(this.horizontalSliderFactory()),
+				setContentPosition: position => this._content.x = position,
+				getContentPosition: () => this._content.x,
+				getScrollSize: () => this.w,
+				getContentSize: () => this._content.w,
+			};
+			this._horizontalDirection.slider.addListener(
 				SliderAbstract.CHANGE_PERCENT,
 				() => {
-					this.refreshContentPosition(
-						this.w,
-						this._content.w,
-						this._horizontalSlider.getPercent(),
-						position => this._content.x = position,
-					)
+					this.refreshContentPosition(this._horizontalDirection);
 				},
 				this,
 			);
 		}
-		if (this._enabledVertical) {
-			this._verticalSlider = this.addChild(this.verticalSliderFactory());
-			this._verticalSlider.addListener(
+		if (enabledVertical) {
+			this._verticalDirection = {
+				slider: this.addChild(this.verticalSliderFactory()),
+				setContentPosition: position => this._content.y = position,
+				getContentPosition: () => this._content.y,
+				getScrollSize: () => this.h,
+				getContentSize: () => this._content.h,
+			};
+			this._verticalDirection.slider.addListener(
 				SliderAbstract.CHANGE_PERCENT,
 				() => {
-					this.refreshContentPosition(
-						this.h,
-						this._content.h,
-						this._verticalSlider.getPercent(),
-						position => this._content.y = position,
-					)
+					this.refreshContentPosition(this._verticalDirection);
 				},
 				this,
 			);
 		}
-		if (this._enabledVertical && this._enabledHorizontal) {
+		if (enabledHorizontal && enabledVertical) {
 			this._corner = this.addChild(new GraphicsView(0x000000));
 			this._corner.interactive = true;
 		}
+	}
+
+	private refreshContentPosition(direction:IDirection):void {
+		direction.setContentPosition(Math.floor(direction.slider.getPercent() * direction.contentMinPosition));
 	}
 
 	public addContent<T extends View>(content:T):T {
@@ -91,54 +92,26 @@ export default class ScrollAbstract extends View {
 
 	private interactiveBackgroundMoveHandler(event:InteractionEvent):void {
 		const eventPoint:IPoint = this.toLocal(event.data.global);
-		this.moveContentByX(eventPoint.x - this._contentMovingShift.x);
-		this.moveContentByY(eventPoint.y - this._contentMovingShift.y);
+		this.moveContent(this._horizontalDirection, eventPoint.x - this._contentMovingShift.x);
+		this.moveContent(this._verticalDirection, eventPoint.y - this._contentMovingShift.y);
 	}
 
-	private moveContentByX(targetX:number):void {
-		this.moveContent(
-			this._horizontalSlider,
-			this.w,
-			this._content.w,
-			targetX,
-			position => this._content.x = position,
-		);
-	}
-
-	private moveContentByY(targetY:number):void {
-		this.moveContent(
-			this._verticalSlider,
-			this.h,
-			this._content.h,
-			targetY,
-			position => this._content.y = position,
-		);
-	}
-
-	private moveContent(
-		slider:SliderAbstract,
-		currentSize:number,
-		contentSize:number,
-		targetPosition:number,
-		setPosition:(position:number) => void
-	):void {
-		if (this.sliderIsVisible(slider)) {
-			const minPosition:number = currentSize - contentSize;
-			const correctedPosition:number = Math.max(minPosition, Math.min(0, targetPosition));
-			setPosition(correctedPosition);
-			slider.setPercent(correctedPosition / minPosition);
-			slider.validate();
+	private moveContent(direction:IDirection, targetPosition:number):void {
+		if (this.sliderIsVisible(direction)) {
+			this.setContentPosition(direction, targetPosition);
+			this.refreshSliderPercent(direction);
 		}
 	}
 
-	private refreshContentPosition(
-		currentSize:number,
-		contentSize:number,
-		percent:number,
-		setPosition:(position:number) => void
-	):void {
-		const minPosition:number = currentSize - contentSize;
-		setPosition(Math.max(minPosition, Math.min(0, minPosition * percent)));
+	private setContentPosition(direction:IDirection, targetPosition:number):void {
+		direction.setContentPosition(
+			Math.max(direction.contentMinPosition, Math.min(0, targetPosition))
+		);
+	}
+
+	private refreshSliderPercent(direction:IDirection):void {
+		direction.slider.setPercent(direction.getContentPosition() / direction.contentMinPosition);
+		direction.slider.validate();
 	}
 
 	protected applySize():void {
@@ -148,89 +121,99 @@ export default class ScrollAbstract extends View {
 	}
 
 	private refresh():void {
-		this.refreshSliderVisibility(this._horizontalSlider, this.w, this._content.w);
-		this.refreshSliderVisibility(this._verticalSlider, this.h, this._content.h);
-		this.refreshDirection(
-			this._horizontalSlider,
-			this.w,
-			this._content.w,
-			this._content.x,
+		this.refreshSliderVisibility(this._horizontalDirection);
+		this.refreshSliderVisibility(this._verticalDirection);
+		this.refreshByDirection(
+			this._horizontalDirection,
 			{
 				bottom: 0,
-				w: this.sliderIsVisible(this._verticalSlider) ? this.w - this.getSliderThickness() : this.w,
+				w: this.sliderIsVisible(this._verticalDirection) ? this.w - this.getSliderThickness() : this.w,
 				h: this.getSliderThickness(),
 			},
 			() => this.centerHorizontal(this._content),
-			position => this._content.x = position
 		);
-		this.refreshDirection(
-			this._verticalSlider,
-			this.h,
-			this._content.h,
-			this._content.y,
+		this.refreshByDirection(this._verticalDirection,
 			{
 				right: 0,
 				w: this.getSliderThickness(),
-				h: this.sliderIsVisible(this._horizontalSlider) ? this.h - this.getSliderThickness() : this.h,
+				h: this.sliderIsVisible(this._horizontalDirection) ? this.h - this.getSliderThickness() : this.h,
 			},
 			() => this.centerVertical(this._content),
-			position => this._content.y = position
 		);
 		this.alignCorner();
-		const hasVisibleSlider:boolean = this.sliderIsVisible(this._verticalSlider) || this.sliderIsVisible(this._horizontalSlider);
-		if (!this._wheelListener && hasVisibleSlider) {
-			this._wheelListener = this.mouseWheelHandler.bind(this);
-			window.addEventListener("mousewheel", this._wheelListener, { passive:false });
-		} else if (this._wheelListener && !hasVisibleSlider) {
-			window.removeEventListener("mousewheel", this._wheelListener);
-			this._wheelListener = null;
+
+		let hasVisibleSlider:boolean =
+			this.sliderIsVisible(this._verticalDirection) ||
+			this.sliderIsVisible(this._horizontalDirection);
+		if (this._hasVisibleSlider !== hasVisibleSlider) {
+			this._hasVisibleSlider = hasVisibleSlider;
+			if (this._hasVisibleSlider) {
+				this._wheelListener = this.mouseWheelHandler.bind(this);
+				window.addEventListener("mousewheel", this._wheelListener, {passive: false});
+
+				this._interactiveBackground.on(POINTER_DOWN, this.interactiveBackgroundPointerDownHandler, this);
+				this._interactiveBackground.on(POINTER_UP, this.interactiveBackgroundPointerUpHandler, this);
+				this._interactiveBackground.on(POINTER_UP_OUTSIDE, this.interactiveBackgroundPointerUpHandler, this);
+			} else {
+				window.removeEventListener("mousewheel", this._wheelListener);
+				this._wheelListener = null;
+
+				this._interactiveBackground.off(POINTER_DOWN, this.interactiveBackgroundPointerDownHandler, this);
+				this._interactiveBackground.off(POINTER_UP, this.interactiveBackgroundPointerUpHandler, this);
+				this._interactiveBackground.off(POINTER_UP_OUTSIDE, this.interactiveBackgroundPointerUpHandler, this);
+			}
 		}
 	}
 
-	private mouseWheelHandler(e:WheelEvent):void {
-		let shift:number = 50;
-		if (this.sliderIsVisible(this._verticalSlider)) {
-			if (e.deltaY > 0) {
-				shift *= -1;
-			}
-			this.moveContentByY(this._content.y + shift);
-		} else {
-			if (e.deltaY < 0) {
-				shift *= -1;
-			}
-			this.moveContentByX(this._content.x + shift);
-		}
+	private refreshSliderVisibility(direction:IDirection):void {
+		direction.slider.visible = direction && direction.getScrollSize() < direction.getContentSize();
 	}
 
-	private refreshSliderVisibility(slider:SliderAbstract, currentSize:number, contentSize:number):void {
-		slider.visible = currentSize < contentSize;
+	private sliderIsVisible(direction:IDirection):boolean {
+		return direction && direction.slider && direction.slider.visible;
 	}
 
-	private refreshDirection(
-		slider:SliderAbstract,
-		currentSize:number,
-		contentSize:number,
-		contentPosition:number,
-		sliderAlignment:IAlignment,
-		centerContent:() => void,
-		setContentPosition:(position:number) => void,
-	):void {
-		if (this.sliderIsVisible(slider)) {
-			const minContentPosition:number = currentSize - contentSize;
-			slider.setPercent(contentPosition / minContentPosition);
-			slider.setThumbPercentSize(currentSize / contentSize);
-			this.align(slider, sliderAlignment);
-			slider.validate();
-
-			setContentPosition(Math.max(minContentPosition, Math.min(0, contentPosition)));
+	private refreshByDirection(direction:IDirection, sliderAlignment:IAlignment, centerContent:() => void):void {
+		if (this.sliderIsVisible(direction)) {
+			this.recalculateContentMinPosition(direction);
+			this.refreshSliderPercent(direction);
+			this.refreshSliderThumb(direction);
+			this.align(direction.slider, sliderAlignment);
+			direction.slider.validate();
+			this.setContentPosition(direction, direction.getContentPosition());
 		} else {
 			centerContent();
 		}
 	}
 
+	private recalculateContentMinPosition(direction:IDirection):void {
+		direction.contentMinPosition = direction.getScrollSize() - direction.getContentSize();
+	}
+
+	private refreshSliderThumb(direction:IDirection):void {
+		direction.slider.setThumbPercentSize(direction.getScrollSize() / direction.getContentSize());
+	}
+
+	private mouseWheelHandler(e:WheelEvent):void {
+		let shift:number = 50;
+		if (this.sliderIsVisible(this._verticalDirection)) {
+			if (e.deltaY > 0) {
+				shift *= -1;
+			}
+			this.moveContent(this._verticalDirection, this._content.y + shift);
+		} else {
+			if (e.deltaY < 0) {
+				shift *= -1;
+			}
+			this.moveContent(this._horizontalDirection, this._content.x + shift);
+		}
+	}
+
 	private alignCorner():void {
 		if (this._corner) {
-			this._corner.visible = this.sliderIsVisible(this._horizontalSlider) && this.sliderIsVisible(this._verticalSlider);
+			this._corner.visible =
+				this.sliderIsVisible(this._horizontalDirection) &&
+				this.sliderIsVisible(this._verticalDirection);
 			if (this._corner.visible) {
 				this.align(
 					this._corner,
@@ -243,10 +226,6 @@ export default class ScrollAbstract extends View {
 				)
 			}
 		}
-	}
-
-	private sliderIsVisible(slider:SliderAbstract):boolean {
-		return slider && slider.visible;
 	}
 
 	//////////////////////
@@ -264,4 +243,13 @@ export default class ScrollAbstract extends View {
 	protected verticalSliderFactory():SliderAbstractV {
 		return null;
 	}
+}
+
+interface IDirection {
+	slider:SliderAbstract,
+	setContentPosition:(position:number) => void,
+	getContentPosition:() => number,
+	getScrollSize:() => number,
+	getContentSize:() => number,
+	contentMinPosition?:number,
 }
