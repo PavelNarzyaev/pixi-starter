@@ -152,7 +152,7 @@ export default class ScrollAbstract extends View {
 	}
 
 	private animationStep(direction:IDirection, dt:number):void {
-		const slowdown:number = .92;
+		const slowdown:number = .90;
 		if (this.sliderIsVisible(direction)) {
 			this.contentSpeedCorrection(direction);
 			if (direction.contentSpeed) {
@@ -273,18 +273,26 @@ export default class ScrollAbstract extends View {
 	}
 
 	private mouseWheelHandler(e:WheelEvent):void {
-		let shift:number = 50;
+		let shift:number = 7;
 		if (this.sliderIsVisible(this._verticalDirection)) {
 			if (e.deltaY > 0) {
 				shift *= -1;
 			}
-			this.moveContent(this._verticalDirection, this._content.y + shift);
+			this.wheelDirection(this._verticalDirection, shift);
 		} else {
 			if (e.deltaY < 0) {
 				shift *= -1;
 			}
-			this.moveContent(this._horizontalDirection, this._content.x + shift);
+			this.wheelDirection(this._horizontalDirection, shift);
 		}
+	}
+
+	private wheelDirection(direction:IDirection, shift:number):void {
+		if (shift > 0 !== direction.contentSpeed > 0) {
+			direction.contentSpeed = 0;
+		}
+		direction.contentSpeed += shift;
+		this.startDirectionAnimation(direction);
 	}
 
 	private alignCorner():void {
