@@ -4,11 +4,19 @@ import SliderAbstractV from "./sliders/SliderAbstractV";
 import SliderAbstract from "./sliders/SliderAbstract";
 import GraphicsView from "../GraphicsView";
 import IPoint = PIXI.IPoint;
-import {POINTER_DOWN, POINTER_MOVE, POINTER_UP, POINTER_UP_OUTSIDE} from "../../../PointerEvents";
+import {
+	POINTER_DOWN,
+	POINTER_MOVE,
+	POINTER_OUT,
+	POINTER_OVER,
+	POINTER_UP,
+	POINTER_UP_OUTSIDE
+} from "../../../PointerEvents";
 import InteractionEvent = PIXI.interaction.InteractionEvent;
 import Container = PIXI.Container;
 import App from "../../../App";
 import Point = PIXI.Point;
+import Graphics = PIXI.Graphics;
 
 export default class ScrollAbstract extends View {
 	private _interactiveBackground:GraphicsView;
@@ -23,9 +31,18 @@ export default class ScrollAbstract extends View {
 	private _horizontalDirection:IDirection;
 	private _verticalDirection:IDirection;
 	private _hasVisibleSlider:boolean;
+	private _currentMask:Graphics;
+	private _over:boolean;
 
-	constructor(enabledHorizontal:boolean = false, enabledVertical:boolean = true) {
+	constructor(enabledHorizontal:boolean = false, enabledVertical:boolean = true, useMask:boolean = true) {
 		super();
+		this.interactive = true;
+		this.on(POINTER_OVER, this.pointerOverHandler, this);
+		this.on(POINTER_OUT, this.pointerOutHandler, this);
+		if (useMask) {
+			this._currentMask = this.addChild(new Graphics());
+			this.mask = this._currentMask;
+		}
 		this._interactiveBackground = this.addChild(new GraphicsView(0xffffff));
 		this._interactiveBackground.interactive = true;
 		this._interactiveBackground.alpha = 0;
@@ -66,6 +83,16 @@ export default class ScrollAbstract extends View {
 			this._corner = this.addChild(new GraphicsView(0x000000));
 			this._corner.interactive = true;
 		}
+	}
+
+	private pointerOverHandler():void {
+		this._over = true;
+		this.tryToAddWheelListener();
+	}
+
+	private pointerOutHandler():void {
+		this._over = false;
+		this.removeWheelListener();
 	}
 
 	private refreshContentPosition(direction:IDirection):void {
@@ -195,6 +222,11 @@ export default class ScrollAbstract extends View {
 	protected applySize():void {
 		super.applySize();
 		this._interactiveBackground.setSize(this.w, this.h);
+		if (this._currentMask) {
+			this._currentMask.clear();
+			this._currentMask.beginFill(0x000000);
+			this._currentMask.drawRect(0, 0, this.w, this.h);
+		}
 		this.refresh();
 	}
 
@@ -227,19 +259,28 @@ export default class ScrollAbstract extends View {
 			this._hasVisibleSlider = hasVisibleSlider;
 			if (this._hasVisibleSlider) {
 				this._wheelListener = this.mouseWheelHandler.bind(this);
-				window.addEventListener("mousewheel", this._wheelListener, {passive: false});
-
+				this.tryToAddWheelListener();
 				this._interactiveBackground.on(POINTER_DOWN, this.interactiveBackgroundPointerDownHandler, this);
-
 			} else {
-				window.removeEventListener("mousewheel", this._wheelListener);
+				this.removeWheelListener();
 				this._wheelListener = null;
-
 				this._interactiveBackground.off(POINTER_DOWN, this.interactiveBackgroundPointerDownHandler, this);
 				this._interactiveBackground.off(POINTER_UP, this.interactiveBackgroundPointerUpHandler, this);
 				this._interactiveBackground.off(POINTER_UP_OUTSIDE, this.interactiveBackgroundPointerUpHandler, this);
 				this._interactiveBackground.off(POINTER_MOVE, this.interactiveBackgroundMoveHandler, this);
 			}
+		}
+	}
+
+	private tryToAddWheelListener():void {
+		if (this._wheelListener && this._over) {
+			window.addEventListener("mousewheel", this._wheelListener, {passive: false});
+		}
+	}
+
+	private removeWheelListener():void {
+		if (this._wheelListener) {
+			window.removeEventListener("mousewheel", this._wheelListener);
 		}
 	}
 
