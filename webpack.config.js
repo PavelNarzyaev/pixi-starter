@@ -81,7 +81,8 @@ module.exports = env => {
 
 	plugins.push(
 		new webpack.ProvidePlugin({
-			PIXI: "pixi.js"
+			PIXI: "pixi.js",
+			gsap: "gsap",
 		})
 	);
 

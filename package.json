@@ -21,6 +21,7 @@
     "@babel/runtime": "^7.7.6",
     "@babel/plugin-transform-runtime": "^7.7.6",
     "@babel/preset-env": "^7.7.4",
+    "@types/gsap": "^1.20.2",
     "@types/node": "^12.12.14",
     "babel-core": "^6.26.3",
     "babel-loader": "^8.0.6",
@@ -40,6 +41,7 @@
   },
   "dependencies": {
     "babel-polyfill": "^6.26.0",
+    "gsap": "^3.0.4",
     "pixi.js": "^5.2.0",
     "webpack": "^4.41.2"
   }

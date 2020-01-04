@@ -17,8 +17,12 @@ import Container = PIXI.Container;
 import App from "../../../App";
 import Point = PIXI.Point;
 import Graphics = PIXI.Graphics;
+import Quad = gsap.Quad;
+import TweenMax = gsap.TweenMax;
 
 export default class ScrollAbstract extends View {
+	private static readonly EASING:any = Quad.easeOut;
+
 	private _interactiveBackground:GraphicsView;
 	private _corner:GraphicsView;
 	private _contentLayer:Container;
@@ -36,9 +40,11 @@ export default class ScrollAbstract extends View {
 
 	constructor(enabledHorizontal:boolean = false, enabledVertical:boolean = true, useMask:boolean = true) {
 		super();
-		this.interactive = true;
-		this.on(POINTER_OVER, this.pointerOverHandler, this);
-		this.on(POINTER_OUT, this.pointerOutHandler, this);
+		if (enabledHorizontal || enabledVertical) {
+			this.interactive = true;
+			this.on(POINTER_OVER, this.pointerOverHandler, this);
+			this.on(POINTER_OUT, this.pointerOutHandler, this);
+		}
 		if (useMask) {
 			this._currentMask = this.addChild(new Graphics());
 			this.mask = this._currentMask;
@@ -50,10 +56,11 @@ export default class ScrollAbstract extends View {
 		if (enabledHorizontal) {
 			this._horizontalDirection = {
 				slider: this.addChild(this.horizontalSliderFactory()),
-				setContentPosition: position => this._content.x = position,
-				getContentPosition: () => this._content.x,
+				setContentPos: position => this._content.x = position,
+				getContentPos: () => this._content.x,
 				getScrollSize: () => this.w,
 				getContentSize: () => this._content.w,
+				getPointPos: (point:Point) => point.x,
 			};
 			this._horizontalDirection.slider.addListener(
 				SliderAbstract.CHANGE_PERCENT,
@@ -66,10 +73,11 @@ export default class ScrollAbstract extends View {
 		if (enabledVertical) {
 			this._verticalDirection = {
 				slider: this.addChild(this.verticalSliderFactory()),
-				setContentPosition: position => this._content.y = position,
-				getContentPosition: () => this._content.y,
+				setContentPos: position => this._content.y = position,
+				getContentPos: () => this._content.y,
 				getScrollSize: () => this.h,
 				getContentSize: () => this._content.h,
+				getPointPos: (point:Point) => point.y,
 			};
 			this._verticalDirection.slider.addListener(
 				SliderAbstract.CHANGE_PERCENT,
@@ -96,7 +104,7 @@ export default class ScrollAbstract extends View {
 	}
 
 	private refreshContentPosition(direction:IDirection):void {
-		direction.setContentPosition(Math.floor(direction.slider.getPercent() * direction.contentMinPosition));
+		direction.setContentPos(Math.floor(direction.slider.getPercent() * direction.contentMinPos));
 	}
 
 	public addContent<T extends View>(content:T):T {
@@ -113,9 +121,9 @@ export default class ScrollAbstract extends View {
 	}
 
 	private interactiveBackgroundPointerDownHandler(event:InteractionEvent):void {
+		TweenMax.killTweensOf(this._horizontalDirection);
+		TweenMax.killTweensOf(this._verticalDirection);
 		this._contentMovingShift = this._content.toLocal(event.data.global);
-		this._horizontalDirection.contentSpeed = 0;
-		this._verticalDirection.contentSpeed = 0;
 		this._interactiveBackground.off(POINTER_DOWN, this.interactiveBackgroundPointerDownHandler, this);
 		this._interactiveBackground.on(POINTER_UP, this.interactiveBackgroundPointerUpHandler, this);
 		this._interactiveBackground.on(POINTER_UP_OUTSIDE, this.interactiveBackgroundPointerUpHandler, this);
@@ -135,7 +143,7 @@ export default class ScrollAbstract extends View {
 		if (this._movingPoint2.x !== null || this._movingPoint2.y !== null) {
 			this._movingPoint1.x = this._movingPoint2.x;
 			this._movingPoint1.y = this._movingPoint2.y;
-			this._movingPointsDt = dt;
+			this._movingPointsDt = App.pixi.ticker.deltaMS;
 		}
 		const globalPoint:Point = App.pixi.renderer.plugins.interaction.mouse.global;
 		this._movingPoint2.x = globalPoint.x;
@@ -149,56 +157,40 @@ export default class ScrollAbstract extends View {
 		this._interactiveBackground.off(POINTER_UP_OUTSIDE, this.interactiveBackgroundPointerUpHandler, this);
 		this._interactiveBackground.off(POINTER_MOVE, this.interactiveBackgroundMoveHandler, this);
 		if (this._movingPoint1 && this._movingPoint2) {
-			if (this.sliderIsVisible(this._horizontalDirection)) {
-				this._horizontalDirection.contentSpeed = (this._movingPoint2.x - this._movingPoint1.x) / this._movingPointsDt;
-			}
-			if (this.sliderIsVisible(this._verticalDirection)) {
-				this._verticalDirection.contentSpeed = (this._movingPoint2.y - this._movingPoint1.y) / this._movingPointsDt;
-			}
+			this.directionDragInertia(this._horizontalDirection);
+			this.directionDragInertia(this._verticalDirection);
 		}
-		this.startDirectionAnimation(this._horizontalDirection);
-		this.startDirectionAnimation(this._verticalDirection);
 		App.pixi.ticker.remove(this.refreshMovingPoints, this);
 	}
 
-	private startDirectionAnimation(direction:IDirection):void {
-		this.contentSpeedCorrection(direction);
-		if (this.sliderIsVisible(direction) && !direction.animationHandler && direction.contentSpeed) {
-			direction.animationHandler = (dt:number) => {
-				this.animationStep(direction, dt);
-			};
-			App.pixi.ticker.add(direction.animationHandler);
-		}
-	}
-
-	private stopDirectionAnimation(direction:IDirection):void {
-		if (direction.animationHandler) {
-			App.pixi.ticker.remove(direction.animationHandler);
-			direction.animationHandler = null;
-		}
-	}
-
-	private animationStep(direction:IDirection, dt:number):void {
-		const slowdown:number = .90;
+	// If you want more clear code, use https://greensock.com/inertia/ plugin
+	private directionDragInertia(direction:IDirection):void {
 		if (this.sliderIsVisible(direction)) {
-			this.contentSpeedCorrection(direction);
-			if (direction.contentSpeed) {
-				this.moveContent(direction, direction.getContentPosition() + direction.contentSpeed * dt);
-				direction.contentSpeed *= slowdown;
-			} else {
-				this.stopDirectionAnimation(direction);
+			const speed:number = this.getPointsShift(direction) / (this._movingPointsDt / 1000);
+			if (Math.abs(speed) >= 1) {
+				let shift:number = Math.floor(speed * .5);
+				let targetPosition:number = direction.getContentPos() + shift;
+				let positionWasCorrected:boolean = false;
+				if (targetPosition > 0) {
+					targetPosition = 0;
+					positionWasCorrected = true;
+				} else if (targetPosition < direction.contentMinPos) {
+					targetPosition = direction.contentMinPos;
+					positionWasCorrected = true;
+				}
+				if (positionWasCorrected) {
+					shift = targetPosition - direction.getContentPos();
+				}
+				const accuracy:number = .001;
+				const easingSpeedCorrection:number = ScrollAbstract.EASING(accuracy) / accuracy;
+				const duration:number = (easingSpeedCorrection * shift) / speed;
+				this.animateDirection(direction, duration, { contentAnimationPos:targetPosition });
 			}
 		}
 	}
 
-	private contentSpeedCorrection(direction:IDirection):void {
-		if (
-			(Math.abs(direction.contentSpeed) < 1) ||
-			(direction.contentSpeed > 0 && direction.getContentPosition() === 0) ||
-			(direction.contentSpeed < 0 && direction.getContentPosition() === direction.contentMinPosition)
-		) {
-			direction.contentSpeed = 0;
-		}
+	private getPointsShift(direction:IDirection):number {
+		return direction.getPointPos(this._movingPoint2) - direction.getPointPos(this._movingPoint1);
 	}
 
 	private moveContent(direction:IDirection, targetPosition:number):void {
@@ -209,13 +201,13 @@ export default class ScrollAbstract extends View {
 	}
 
 	private setContentPosition(direction:IDirection, targetPosition:number):void {
-		direction.setContentPosition(
-			Math.max(direction.contentMinPosition, Math.min(0, targetPosition))
+		direction.setContentPos(
+			Math.max(direction.contentMinPos, Math.min(0, targetPosition))
 		);
 	}
 
 	private refreshSliderPercent(direction:IDirection):void {
-		direction.slider.setPercent(direction.getContentPosition() / direction.contentMinPosition);
+		direction.slider.setPercent(direction.getContentPos() / direction.contentMinPos);
 		direction.slider.validate();
 	}
 
@@ -299,14 +291,14 @@ export default class ScrollAbstract extends View {
 			this.refreshSliderThumb(direction);
 			this.align(direction.slider, sliderAlignment);
 			direction.slider.validate();
-			this.setContentPosition(direction, direction.getContentPosition());
+			this.setContentPosition(direction, direction.getContentPos());
 		} else {
 			centerContent();
 		}
 	}
 
 	private recalculateContentMinPosition(direction:IDirection):void {
-		direction.contentMinPosition = direction.getScrollSize() - direction.getContentSize();
+		direction.contentMinPos = direction.getScrollSize() - direction.getContentSize();
 	}
 
 	private refreshSliderThumb(direction:IDirection):void {
@@ -314,7 +306,7 @@ export default class ScrollAbstract extends View {
 	}
 
 	private mouseWheelHandler(e:WheelEvent):void {
-		let shift:number = 7;
+		let shift:number = 90;
 		if (this.sliderIsVisible(this._verticalDirection)) {
 			if (e.deltaY > 0) {
 				shift *= -1;
@@ -329,11 +321,59 @@ export default class ScrollAbstract extends View {
 	}
 
 	private wheelDirection(direction:IDirection, shift:number):void {
-		if (shift > 0 !== direction.contentSpeed > 0) {
-			direction.contentSpeed = 0;
+		let duration:number = 1;
+		let targetPosition:number;
+		if (this.animationInProgress(direction) && !this.changeAnimationDirection(direction, shift)) {
+			shift = direction.contentAnimationTargetPos + shift - direction.getContentPos();
 		}
-		direction.contentSpeed += shift;
-		this.startDirectionAnimation(direction);
+		targetPosition = direction.getContentPos() + shift;
+		let positionWasCorrected:boolean = false;
+		if (targetPosition > 0) {
+			targetPosition = 0;
+			positionWasCorrected = true;
+		} else if (targetPosition < direction.contentMinPos) {
+			targetPosition = direction.contentMinPos;
+			positionWasCorrected = true;
+		}
+		if (positionWasCorrected) {
+			duration *= (targetPosition - direction.getContentPos()) / shift;
+		}
+		this.animateDirection(direction, duration, { contentAnimationPos:targetPosition });
+	}
+
+	private animateDirection(direction:IDirection, duration:number, tweenVars:ITweenVars):void {
+		direction.contentAnimationPos = direction.getContentPos();
+		direction.contentAnimationTargetPos = tweenVars.contentAnimationPos;
+		TweenMax.killTweensOf(direction);
+		TweenMax.to(
+			direction,
+			duration,
+			{
+				...tweenVars,
+				onUpdate:this.onTweenUpdate.bind(this),
+				onUpdateParams:[direction],
+				onComplete:this.onTweenComplete.bind(this),
+				onCompleteParams:[direction],
+				ease:ScrollAbstract.EASING
+			}
+		);
+	}
+
+	private animationInProgress(direction:IDirection):boolean {
+		return direction.contentAnimationTargetPos !== undefined;
+	}
+
+	private changeAnimationDirection(direction:IDirection, shift:number) {
+		return shift > 0 !== (direction.contentAnimationTargetPos - direction.contentAnimationPos) > 0;
+	}
+
+	private onTweenUpdate(direction:IDirection):void {
+		this.moveContent(direction, Math.floor(direction.contentAnimationPos));
+	}
+
+	private onTweenComplete(direction:IDirection):void {
+		this.moveContent(direction, direction.contentAnimationTargetPos);
+		delete direction.contentAnimationTargetPos;
 	}
 
 	private alignCorner():void {
@@ -374,11 +414,16 @@ export default class ScrollAbstract extends View {
 
 interface IDirection {
 	slider:SliderAbstract,
-	setContentPosition:(position:number) => void,
-	getContentPosition:() => number,
+	setContentPos:(position:number) => void,
+	getContentPos:() => number,
 	getScrollSize:() => number,
 	getContentSize:() => number,
-	contentMinPosition?:number,
-	contentSpeed?:number,
-	animationHandler?:(dt:number) => void,
+	getPointPos:(point:Point) => number,
+	contentMinPos?:number,
+	contentAnimationPos?:number,
+	contentAnimationTargetPos?:number,
+}
+
+interface ITweenVars {
+	contentAnimationPos:number,
 }
