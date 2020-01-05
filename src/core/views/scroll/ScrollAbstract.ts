@@ -14,11 +14,10 @@ import {
 } from "../../../PointerEvents";
 import InteractionEvent = PIXI.interaction.InteractionEvent;
 import Container = PIXI.Container;
-import App from "../../../App";
-import Point = PIXI.Point;
 import Graphics = PIXI.Graphics;
 import Quad = gsap.Quad;
 import TweenMax = gsap.TweenMax;
+import App from "../../../App";
 
 export default class ScrollAbstract extends View {
 	private static readonly EASING:any = Quad.easeOut;
@@ -27,9 +26,8 @@ export default class ScrollAbstract extends View {
 	private _corner:GraphicsView;
 	private _contentLayer:Container;
 	private _contentMovingShift:IPoint;
-	private _movingPoint1:Point = new Point(null, null);
-	private _movingPoint2:Point = new Point(null, null);
-	private _movingPointsDt:number;
+	private _currentMovingPoint:IPoint;
+	private _movingPoints:IMovingPoint[] = [];
 	private _content:View;
 	private _wheelListener:(event:WheelEvent) => void;
 	private _horizontalDirection:IDirection;
@@ -60,7 +58,7 @@ export default class ScrollAbstract extends View {
 				getContentPos: () => this._content.x,
 				getScrollSize: () => this.w,
 				getContentSize: () => this._content.w,
-				getPointPos: (point:Point) => point.x,
+				getPointPos: (point:IPoint) => point.x,
 			};
 			this._horizontalDirection.slider.addListener(
 				SliderAbstract.CHANGE_PERCENT,
@@ -77,7 +75,7 @@ export default class ScrollAbstract extends View {
 				getContentPos: () => this._content.y,
 				getScrollSize: () => this.h,
 				getContentSize: () => this._content.h,
-				getPointPos: (point:Point) => point.y,
+				getPointPos: (point:IPoint) => point.y,
 			};
 			this._verticalDirection.slider.addListener(
 				SliderAbstract.CHANGE_PERCENT,
@@ -133,9 +131,19 @@ export default class ScrollAbstract extends View {
 		this._interactiveBackground.on(POINTER_UP, this.interactiveBackgroundPointerUpHandler, this);
 		this._interactiveBackground.on(POINTER_UP_OUTSIDE, this.interactiveBackgroundPointerUpHandler, this);
 		this._interactiveBackground.on(POINTER_MOVE, this.interactiveBackgroundMoveHandler, this);
-		this._movingPoint1.x = this._movingPoint1.y = null;
-		this._movingPoint2.x = this._movingPoint2.y = null;
+		this._movingPoints.length = 0;
+		this._currentMovingPoint = this.toLocal(event.data.global);
 		App.pixi.ticker.add(this.refreshMovingPoints, this);
+	}
+
+	private refreshMovingPoints():void {
+		if (this._currentMovingPoint) {
+			const maxMovingPointsLength:number = 3;
+			this._movingPoints.unshift({point: this._currentMovingPoint, time: performance.now()});
+			if (this._movingPoints.length > maxMovingPointsLength) {
+				this._movingPoints.length = maxMovingPointsLength;
+			}
+		}
 	}
 
 	private killDirectionTween(direction:IDirection, refreshSlider:boolean):void {
@@ -147,20 +155,9 @@ export default class ScrollAbstract extends View {
 	}
 
 	private interactiveBackgroundMoveHandler(event:InteractionEvent):void {
-		const eventPoint:IPoint = this.toLocal(event.data.global);
-		this.moveContent(this._horizontalDirection, eventPoint.x - this._contentMovingShift.x);
-		this.moveContent(this._verticalDirection, eventPoint.y - this._contentMovingShift.y);
-	}
-
-	private refreshMovingPoints(dt:number):void {
-		if (this._movingPoint2.x !== null || this._movingPoint2.y !== null) {
-			this._movingPoint1.x = this._movingPoint2.x;
-			this._movingPoint1.y = this._movingPoint2.y;
-			this._movingPointsDt = App.pixi.ticker.deltaMS;
-		}
-		const globalPoint:Point = App.pixi.renderer.plugins.interaction.mouse.global;
-		this._movingPoint2.x = globalPoint.x;
-		this._movingPoint2.y = globalPoint.y;
+		this._currentMovingPoint = this.toLocal(event.data.global);
+		this.moveContent(this._horizontalDirection, this._currentMovingPoint.x - this._contentMovingShift.x);
+		this.moveContent(this._verticalDirection, this._currentMovingPoint.y - this._contentMovingShift.y);
 	}
 
 	private interactiveBackgroundPointerUpHandler():void {
@@ -169,7 +166,7 @@ export default class ScrollAbstract extends View {
 		this._interactiveBackground.off(POINTER_UP, this.interactiveBackgroundPointerUpHandler, this);
 		this._interactiveBackground.off(POINTER_UP_OUTSIDE, this.interactiveBackgroundPointerUpHandler, this);
 		this._interactiveBackground.off(POINTER_MOVE, this.interactiveBackgroundMoveHandler, this);
-		if (this._movingPoint1 && this._movingPoint2) {
+		if (this._movingPoints.length >= 2) {
 			this.directionDragInertia(this._horizontalDirection);
 			this.directionDragInertia(this._verticalDirection);
 		}
@@ -179,7 +176,11 @@ export default class ScrollAbstract extends View {
 	// If you want more clear code, use https://greensock.com/inertia/ plugin
 	private directionDragInertia(direction:IDirection):void {
 		if (this.sliderIsVisible(direction)) {
-			const speed:number = this.getPointsShift(direction) / (this._movingPointsDt / 1000);
+			const firstPoint:IMovingPoint = this._movingPoints[0];
+			const lastPoint:IMovingPoint = this._movingPoints[this._movingPoints.length - 1];
+			const pointsShift:number = direction.getPointPos(lastPoint.point) - direction.getPointPos(firstPoint.point);
+			const pointsDt:number = lastPoint.time - firstPoint.time;
+			const speed:number = pointsShift / (pointsDt / 1000);
 			if (Math.abs(speed) >= 1) {
 				let shift:number = Math.floor(speed * .5);
 				let targetPosition:number = direction.getContentPos() + shift;
@@ -200,10 +201,6 @@ export default class ScrollAbstract extends View {
 				this.animateDirection(direction, duration, { contentAnimationPos:targetPosition });
 			}
 		}
-	}
-
-	private getPointsShift(direction:IDirection):number {
-		return direction.getPointPos(this._movingPoint2) - direction.getPointPos(this._movingPoint1);
 	}
 
 	private moveContent(direction:IDirection, targetPosition:number):void {
@@ -440,7 +437,7 @@ interface IDirection {
 	getContentPos:() => number,
 	getScrollSize:() => number,
 	getContentSize:() => number,
-	getPointPos:(point:Point) => number,
+	getPointPos:(point:IPoint) => number,
 	contentMinPos?:number,
 	contentAnimationPos?:number,
 	contentAnimationTargetPos?:number,
@@ -449,4 +446,9 @@ interface IDirection {
 
 interface ITweenVars {
 	contentAnimationPos:number,
+}
+
+interface IMovingPoint {
+	point:IPoint,
+	time:number,
 }
