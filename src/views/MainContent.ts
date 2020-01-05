@@ -11,7 +11,7 @@ export default class MainContent extends View {
 
 	private _background:TilingSprite;
 	private _button:Button;
-	private _selectableButton:Button;
+	private _checkBox:Button;
 	private _radioButtons:RadioButtons;
 	private _info:Info;
 	private _elements:View[] = [];
@@ -23,7 +23,7 @@ export default class MainContent extends View {
 
 		this._background = this.addChild(new TilingSprite(Texture.from("img/background.png")));
 		this._button = this.initElement(new Button("Button"));
-		this._selectableButton = this.initElement(new Button("Selectable", true));
+		this._checkBox = this.initElement(new Button("Selectable", true));
 		this._radioButtons = this.initElement(new RadioButtons(MainContent.RADIO_NAMES));
 		this._radioButtons.select(0);
 		this._info = this.initElement(new Info());
@@ -37,7 +37,7 @@ export default class MainContent extends View {
 				this.refreshClicks();
 			}
 		);
-		this._selectableButton.addListener(
+		this._checkBox.addListener(
 			InteractiveView.CHANGE_SELECT,
 			() => {
 				this.refreshSelected();
@@ -56,7 +56,7 @@ export default class MainContent extends View {
 	}
 
 	private refreshSelected():void {
-		this._info.setSelected(this._selectableButton.getSelected());
+		this._info.setSelected(this._checkBox.getSelected());
 	}
 
 	private refreshItem():void {
@@ -74,7 +74,7 @@ export default class MainContent extends View {
 		this._background.width = this.w;
 		this._background.height = this.h;
 		this._button.setSize(150, 50);
-		this._selectableButton.setSize(200, 50);
+		this._checkBox.setSize(200, 50);
 		this._radioButtons.setSize(400, 50);
 		this._info.setSize(400, 200);
 
