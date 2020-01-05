@@ -106,7 +106,7 @@ export default class ScrollAbstract extends View {
 	private changePercentHandler(direction:IDirection):void {
 		this.animateDirection(
 			direction,
-			.5,
+			.25,
 			{ contentAnimationPos:direction.slider.getPercent() * direction.contentMinPos },
 			true,
 		);
@@ -321,7 +321,7 @@ export default class ScrollAbstract extends View {
 	}
 
 	private mouseWheelHandler(e:WheelEvent):void {
-		let shift:number = 90;
+		let shift:number = 80;
 		if (this.sliderIsVisible(this._verticalDirection)) {
 			if (e.deltaY > 0) {
 				shift *= -1;
@@ -336,7 +336,7 @@ export default class ScrollAbstract extends View {
 	}
 
 	private wheelDirection(direction:IDirection, shift:number):void {
-		let duration:number = 1;
+		let duration:number = .3;
 		let targetPosition:number;
 		if (this.animationInProgress(direction) && !this.changeAnimationDirection(direction, shift)) {
 			shift = direction.contentAnimationTargetPos + shift - direction.getContentPos();
