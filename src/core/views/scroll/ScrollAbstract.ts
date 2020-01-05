@@ -65,7 +65,7 @@ export default class ScrollAbstract extends View {
 			this._horizontalDirection.slider.addListener(
 				SliderAbstract.CHANGE_PERCENT,
 				() => {
-					this.refreshContentPosition(this._horizontalDirection);
+					this.changePercentHandler(this._horizontalDirection);
 				},
 				this,
 			);
@@ -82,7 +82,7 @@ export default class ScrollAbstract extends View {
 			this._verticalDirection.slider.addListener(
 				SliderAbstract.CHANGE_PERCENT,
 				() => {
-					this.refreshContentPosition(this._verticalDirection);
+					this.changePercentHandler(this._verticalDirection);
 				},
 				this,
 			);
@@ -103,8 +103,13 @@ export default class ScrollAbstract extends View {
 		this.removeWheelListener();
 	}
 
-	private refreshContentPosition(direction:IDirection):void {
-		direction.setContentPos(Math.floor(direction.slider.getPercent() * direction.contentMinPos));
+	private changePercentHandler(direction:IDirection):void {
+		this.animateDirection(
+			direction,
+			.5,
+			{ contentAnimationPos:direction.slider.getPercent() * direction.contentMinPos },
+			true,
+		);
 	}
 
 	public addContent<T extends View>(content:T):T {
@@ -121,8 +126,8 @@ export default class ScrollAbstract extends View {
 	}
 
 	private interactiveBackgroundPointerDownHandler(event:InteractionEvent):void {
-		TweenMax.killTweensOf(this._horizontalDirection);
-		TweenMax.killTweensOf(this._verticalDirection);
+		this.killDirectionTween(this._horizontalDirection, true);
+		this.killDirectionTween(this._verticalDirection, true);
 		this._contentMovingShift = this._content.toLocal(event.data.global);
 		this._interactiveBackground.off(POINTER_DOWN, this.interactiveBackgroundPointerDownHandler, this);
 		this._interactiveBackground.on(POINTER_UP, this.interactiveBackgroundPointerUpHandler, this);
@@ -131,6 +136,14 @@ export default class ScrollAbstract extends View {
 		this._movingPoint1.x = this._movingPoint1.y = null;
 		this._movingPoint2.x = this._movingPoint2.y = null;
 		App.pixi.ticker.add(this.refreshMovingPoints, this);
+	}
+
+	private killDirectionTween(direction:IDirection, refreshSlider:boolean):void {
+		if (direction.excludeSliderFromAnimation && refreshSlider) {
+			direction.excludeSliderFromAnimation = false;
+			this.refreshSliderPercent(direction);
+		}
+		TweenMax.killTweensOf(direction);
 	}
 
 	private interactiveBackgroundMoveHandler(event:InteractionEvent):void {
@@ -196,7 +209,9 @@ export default class ScrollAbstract extends View {
 	private moveContent(direction:IDirection, targetPosition:number):void {
 		if (this.sliderIsVisible(direction)) {
 			this.setContentPosition(direction, targetPosition);
-			this.refreshSliderPercent(direction);
+			if (!direction.excludeSliderFromAnimation) {
+				this.refreshSliderPercent(direction);
+			}
 		}
 	}
 
@@ -341,10 +356,16 @@ export default class ScrollAbstract extends View {
 		this.animateDirection(direction, duration, { contentAnimationPos:targetPosition });
 	}
 
-	private animateDirection(direction:IDirection, duration:number, tweenVars:ITweenVars):void {
+	private animateDirection(
+		direction:IDirection,
+		duration:number,
+		tweenVars:ITweenVars,
+		excludeSlider:boolean = false
+	):void {
 		direction.contentAnimationPos = direction.getContentPos();
 		direction.contentAnimationTargetPos = tweenVars.contentAnimationPos;
-		TweenMax.killTweensOf(direction);
+		this.killDirectionTween(direction, direction.excludeSliderFromAnimation && !excludeSlider);
+		direction.excludeSliderFromAnimation = excludeSlider;
 		TweenMax.to(
 			direction,
 			duration,
@@ -373,6 +394,7 @@ export default class ScrollAbstract extends View {
 
 	private onTweenComplete(direction:IDirection):void {
 		this.moveContent(direction, direction.contentAnimationTargetPos);
+		direction.excludeSliderFromAnimation = false;
 		delete direction.contentAnimationTargetPos;
 	}
 
@@ -422,6 +444,7 @@ interface IDirection {
 	contentMinPos?:number,
 	contentAnimationPos?:number,
 	contentAnimationTargetPos?:number,
+	excludeSliderFromAnimation?:boolean,
 }
 
 interface ITweenVars {
