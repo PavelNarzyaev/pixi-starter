@@ -3,92 +3,24 @@ import Graphics = PIXI.Graphics;
 import {genRandomColor} from "../../Random";
 
 export default class View extends Container {
+	public static readonly RESIZE:symbol = Symbol();
+
 	public w:number;
 	public h:number;
-	private _onResizeInitialized:boolean = false;
 	private _testBackground:Graphics;
 	private _testBackgroundColor:number;
 	private _testBackgroundAlpha:number;
 
-	constructor() {
-		super();
-	}
-
-	public setW(value:number|string):void {
-		if (this.w !== value) {
-			this.refreshW(value);
+	public setSize(w:number, h:number, emitResizeEvent:boolean = false):void {
+		const newW:number = this.calculatePixels(w);
+		const newH:number = this.calculatePixels(h);
+		if (this.w !== newW || this.h !== newH) {
+			this.w = newW;
+			this.h = newH;
 			this.applySize();
-		}
-	}
-
-	public setH(value:number|string) {
-		if (this.h !== value) {
-			this.refreshH(value);
-			this.applySize();
-		}
-	}
-
-	public setSize(w:number|string, h:number|string):void {
-		if (this.w !== w || this.h !== h) {
-			this.refreshW(w);
-			this.refreshH(h);
-			this.applySize();
-		}
-	}
-
-	private refreshW(value:number|string):void {
-		if (typeof value === 'number') {
-			this.w = Math.floor(value);
-		} else {
-			this.w = this.calculatePixels((this.parent as View).w, value);
-		}
-	}
-
-	private refreshH(value:number|string):void {
-		if (typeof value === 'number') {
-			this.h = Math.floor(value);
-		} else {
-			this.h = this.calculatePixels((this.parent as View).h, value);
-		}
-	}
-
-	public showTestBackground(color?:number, alpha:number = .5):void {
-		if (!this._testBackground) {
-			this._testBackground = new Graphics();
-			this.addChildAt(this._testBackground, 0);
-			this._testBackgroundColor = color ? color : genRandomColor();
-			this._testBackgroundAlpha = alpha;
-			if (this.w && this.h) {
-				this.applySize();
+			if (emitResizeEvent) {
+				this.emit(View.RESIZE);
 			}
-		}
-	}
-
-	protected applySize():void {
-		if (this._testBackground) {
-			this._testBackground.clear();
-			this._testBackground.lineStyle(1, this._testBackgroundColor);
-			this._testBackground.beginFill(this._testBackgroundColor, this._testBackgroundAlpha);
-			this._testBackground.drawRect(0, 0, this.w, this.h);
-			this._testBackground.endFill();
-		}
-
-		if (!this._onResizeInitialized) {
-			this.onFirstResize();
-			this._onResizeInitialized = true;
-		}
-	}
-
-	protected onFirstResize():void {
-	}
-
-	private calculatePixels(parentSize:number, value:number|string):number {
-		if (value === undefined) {
-			return 0;
-		} else if (typeof value === 'string') {
-			return parentSize * Number(value.slice(0, -1)) / 100;
-		} else {
-			return Math.floor(value);
 		}
 	}
 
@@ -126,25 +58,29 @@ export default class View extends Container {
 	}
 
 	private alignDirection(
-		beforeSize:number|string,
-		size:number|string,
-		afterSize:number|string,
+		beforeSize:number,
+		size:number,
+		afterSize:number,
 		parentSize:number,
 		setPos:(pos:number) => void,
 		setSize:(newSize:number) => void,
 	):void {
 		if (size === undefined) {
-			const pos:number = this.calculatePixels(parentSize, beforeSize);
-			setPos(pos);
-			setSize(parentSize - pos - this.calculatePixels(parentSize, afterSize));
+			const newPos:number = this.calculatePixels(beforeSize);
+			setPos(newPos);
+			setSize(parentSize - newPos - this.calculatePixels(afterSize));
 		} else if (afterSize === undefined) {
-			setSize(this.calculatePixels(parentSize, size));
-			setPos(this.calculatePixels(parentSize, beforeSize));
+			setSize(this.calculatePixels(size));
+			setPos(this.calculatePixels(beforeSize));
 		} else if (beforeSize === undefined) {
-			const newSize:number = this.calculatePixels(parentSize, size);
+			const newSize:number = this.calculatePixels(size);
 			setSize(newSize);
-			setPos(parentSize - newSize - this.calculatePixels(parentSize, afterSize));
+			setPos(parentSize - newSize - this.calculatePixels(afterSize));
 		}
+	}
+
+	private calculatePixels(value:number):number {
+		return value ? Math.floor(value) : 0;
 	}
 
 	public center(child:Container|View):void {
@@ -161,13 +97,46 @@ export default class View extends Container {
 		const childHeight:number = child instanceof View ? child.h : child.height;
 		child.y = Math.floor((this.h - childHeight) / 2);
 	}
+
+	//////////////////////
+	// override methods //
+	//////////////////////
+
+	protected applySize():void {
+		if (this._testBackground) {
+			this._testBackground.clear();
+			this._testBackground.lineStyle(2, this._testBackgroundColor, 1, 0);
+			this._testBackground.beginFill(this._testBackgroundColor, this._testBackgroundAlpha);
+			this._testBackground.drawRect(0, 0, this.w, this.h);
+		}
+	}
+
+	//////////////////
+	// test methods //
+	//////////////////
+
+	public showTestBackground(color?:number, alpha:number = .5):void {
+		if (!this._testBackground) {
+			this._testBackground = new Graphics();
+			this.addChildAt(this._testBackground, 0);
+		}
+		this._testBackgroundColor = color ? color : genRandomColor();
+		this._testBackgroundAlpha = alpha;
+		if (this.w && this.h) {
+			this.applySize();
+		}
+	}
+
+	public getStringSize():string {
+		return this.w + "x" + this.h;
+	}
 }
 
 export interface IAlignment {
-	left?:number|string;
-	right?:number|string;
-	top?:number|string;
-	bottom?:number|string;
-	w?:number|string;
-	h?:number|string;
+	left?:number;
+	right?:number;
+	top?:number;
+	bottom?:number;
+	w?:number;
+	h?:number;
 }
