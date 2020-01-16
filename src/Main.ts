@@ -4,8 +4,8 @@ import App from "./App";
 import MainView from "./views/MainView";
 
 export class Main {
-	private static readonly MIN_MAIN_CONTAINER_WIDTH:number = 600;
-	private static readonly MIN_MAIN_CONTAINER_HEIGHT:number = 550;
+	private static readonly MIN_MAIN_CONTAINER_WIDTH:number = 100;
+	private static readonly MIN_MAIN_CONTAINER_HEIGHT:number = 100;
 	private _size:Rectangle;
 	private _mainView:MainView;
 
@@ -56,20 +56,6 @@ export class Main {
 	private alignMainContainer():void {
 		let targetWidth:number = Math.max(Main.MIN_MAIN_CONTAINER_WIDTH, this._size.width);
 		let targetHeight:number = Math.max(Main.MIN_MAIN_CONTAINER_HEIGHT, this._size.height);
-		const scaleByWidth:number = this.calculateObjectScale(this._size.width, targetWidth);
-		const scaleByHeight:number = this.calculateObjectScale(this._size.height, targetHeight);
-		if (scaleByWidth < scaleByHeight) {
-			targetHeight = Math.floor((targetWidth * this._size.height) / this._size.width);
-		} else if (scaleByHeight < scaleByWidth) {
-			targetWidth = Math.floor((targetHeight * this._size.width) / this._size.height);
-		}
 		this._mainView.setSize(targetWidth, targetHeight);
-		this._mainView.scale.x = this._mainView.scale.y = Math.min(scaleByWidth, scaleByHeight);
-		this._mainView.x = Math.floor((this._size.width - this._mainView.w * this._mainView.scale.x) / 2);
-		this._mainView.y = Math.floor((this._size.height - this._mainView.h * this._mainView.scale.y) / 2);
-	}
-
-	private calculateObjectScale(frameSize:number, objectSize:number):number {
-		return frameSize < objectSize ? frameSize / objectSize : 1;
 	}
 }
