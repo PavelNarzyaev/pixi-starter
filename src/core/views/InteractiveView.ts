@@ -59,7 +59,9 @@ export default class InteractiveView extends View {
 			if (this._selectable) {
 				this._selected = !this._selected;
 			}
-			click = true;
+			if (this._over) {
+				click = true;
+			}
 		}
 		if (this._over) {
 			this.setCurrentState(InteractiveView.OVER_STATE);
