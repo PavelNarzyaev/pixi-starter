@@ -1,2 +1,2 @@
 # Interactive view
-**[Watch](http://dolgofor.ru/pixi-starter/test6 "Open demo")**
+**[Watch](https://pavelnarzyaev.github.io/github-pages/pixi-starter-test-6/ "Open demo")**
