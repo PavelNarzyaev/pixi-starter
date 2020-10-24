@@ -1,2 +1,2 @@
 # Circles with gravity
-**[Watch](http://dolgofor.ru/pixi-starter/test2 "Open demo")** (tap field to restart)
+**[Watch](https://pavelnarzyaev.github.io/github-pages/pixi-starter-test-2/ "Open demo")** (tap field to restart)
