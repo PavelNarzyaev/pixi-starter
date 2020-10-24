@@ -1,2 +1,2 @@
 # Combined scale/resize system
-**[Watch](http://dolgofor.ru/pixi-starter/test3 "Open demo")** (resize browser for test)
+**[Watch](https://pavelnarzyaev.github.io/github-pages/pixi-starter-test-3/ "Open demo")** (resize browser for test)
