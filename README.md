@@ -8,4 +8,4 @@
     * Mouse wheel
     * Content dragging
 
-**[Watch](http://dolgofor.ru/pixi-starter/test7 "Open demo")**
+**[Watch](https://pavelnarzyaev.github.io/github-pages/pixi-starter-test-7/ "Open demo")**
