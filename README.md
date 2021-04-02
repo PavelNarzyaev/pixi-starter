@@ -1,4 +1,4 @@
-# PixiJS + Webpack starter
+# PixiJS + Webpack starter (deprecated)
 Easy deployment project with:
 * PixiJS
 * Webpack
