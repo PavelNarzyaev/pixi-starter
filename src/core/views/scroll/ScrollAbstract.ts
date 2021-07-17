@@ -314,11 +314,10 @@ export default class ScrollAbstract extends View {
 	}
 
 	private mouseWheelHandler(e:WheelEvent):void {
-		let shift:number = -e.deltaY;
 		if (this.sliderIsVisible(this._verticalDirection)) {
-			this.wheelDirection(this._verticalDirection, shift);
+			this.wheelDirection(this._verticalDirection, -e.deltaY);
 		} else {
-			this.wheelDirection(this._horizontalDirection, shift);
+			this.wheelDirection(this._horizontalDirection, -e.deltaY);
 		}
 	}
 
