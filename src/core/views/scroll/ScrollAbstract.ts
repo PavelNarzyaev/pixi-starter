@@ -274,13 +274,13 @@ export default class ScrollAbstract extends View {
 
 	private tryToAddWheelListener():void {
 		if (this._wheelListener && this._over) {
-			window.addEventListener("mousewheel", this._wheelListener, {passive: false});
+			window.addEventListener("wheel", this._wheelListener, false);
 		}
 	}
 
 	private removeWheelListener():void {
 		if (this._wheelListener) {
-			window.removeEventListener("mousewheel", this._wheelListener);
+			window.removeEventListener("wheel", this._wheelListener);
 		}
 	}
 
@@ -314,16 +314,10 @@ export default class ScrollAbstract extends View {
 	}
 
 	private mouseWheelHandler(e:WheelEvent):void {
-		let shift:number = 80;
+		let shift:number = -e.deltaY;
 		if (this.sliderIsVisible(this._verticalDirection)) {
-			if (e.deltaY > 0) {
-				shift *= -1;
-			}
 			this.wheelDirection(this._verticalDirection, shift);
 		} else {
-			if (e.deltaY < 0) {
-				shift *= -1;
-			}
 			this.wheelDirection(this._horizontalDirection, shift);
 		}
 	}
