@@ -6,7 +6,7 @@ Easy deployment project with:
 * Babel
 
 ## Deployment
-* [Download](https://www.npmjs.com/get-npm "Open npmjs.com") and install Node.js and npm
+* [Download](https://nodejs.org/en/ "nodejs.org") and install Node.js
 * Run script **«npm-install»** (**«npm run npm-install»** in terminal)
 * Run script **«local-test»** (**«npm run local-test»** in terminal)
 
